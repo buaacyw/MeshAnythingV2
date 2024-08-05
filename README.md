@@ -97,6 +97,7 @@ python main.py --input_path pc_examples/mouse.npy --out_dir pc_output --input_ty
 
 Our code is based on these wonderful repos:
 
+* [MeshAnything](https://github.com/buaacyw/MeshAnything)
 * [MeshGPT](https://nihalsid.github.io/mesh-gpt/)
 * [meshgpt-pytorch](https://github.com/lucidrains/meshgpt-pytorch)
 * [Michelangelo](https://github.com/NeuralCarver/Michelangelo)
