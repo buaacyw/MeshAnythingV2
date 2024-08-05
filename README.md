@@ -1,5 +1,5 @@
 <p align="center">
-  <h3 align="center"><strong>MeshAnything V2:<br> Artist-Created Mesh Generation With Adjacent Mesh Tokenization</strong></h3>
+  <h3 align="center"><strong>MeshAnything V2:<br> Artist-Created Mesh Generation<br>With Adjacent Mesh Tokenization</strong></h3>
 
 <p align="center">
     <a href="https://buaacyw.github.io/">Yiwen Chen</a><sup>1</sup>,

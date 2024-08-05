@@ -7,6 +7,7 @@ optimum==1.18.0
 omegaconf==2.3.0
 opencv-python==4.9.0.80
 transformers==4.39.3
+numpy==1.26.4
 huggingface_hub
 matplotlib
 gradio
