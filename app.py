@@ -117,13 +117,16 @@ def do_inference(input_3d, sample_seed=0, do_sampling=False, do_marching_cubes=F
     mesh.update_faces(mesh.unique_faces())
     mesh.remove_unreferenced_vertices()
     mesh.fix_normals()
-    if mesh.visual.vertex_colors is not None:
-        orange_color = np.array([255, 165, 0, 255], dtype=np.uint8)
+    try:
+        if mesh.visual.vertex_colors is not None:
+            orange_color = np.array([255, 165, 0, 255], dtype=np.uint8)
 
-        mesh.visual.vertex_colors = np.tile(orange_color, (mesh.vertices.shape[0], 1))
-    else:
-        orange_color = np.array([255, 165, 0, 255], dtype=np.uint8)
-        mesh.visual.vertex_colors = np.tile(orange_color, (mesh.vertices.shape[0], 1))
+            mesh.visual.vertex_colors = np.tile(orange_color, (mesh.vertices.shape[0], 1))
+        else:
+            orange_color = np.array([255, 165, 0, 255], dtype=np.uint8)
+            mesh.visual.vertex_colors = np.tile(orange_color, (mesh.vertices.shape[0], 1))
+    except Exception as e:
+        print(e)
     input_save_name = f"processed_input_{int(time.time())}.obj"
     mesh.export(input_save_name)
     input_render_res = wireframe_render(mesh)
