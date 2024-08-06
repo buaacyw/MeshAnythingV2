@@ -56,6 +56,7 @@ conda activate MeshAnythingV2
 pip install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu118
 pip install -r requirements.txt
 pip install flash-attn --no-build-isolation
+pip install -U gradio
 ```
 
 ## Usage
@@ -88,7 +89,8 @@ python main.py --input_path pc_examples/mouse.npy --out_dir pc_output --input_ty
 ```
 
 ## Important Notes
-- It takes about 10GB and 60s to generate a mesh on an A800 GPU.
+- It takes about 8GB and 45s to generate a mesh on an A6000 GPU (depending on the face number of the generated mesh).
+- We suggest using Rodin to first achieve text or image to dense mesh. And then use MeshAnything to obtain Artist-Created Mesh from dense mesh.
 - The input mesh will be normalized to a unit bounding box. The up vector of the input mesh should be +Y for better results.
 - Limited by computational resources, MeshAnything is trained on meshes with fewer than 1600 faces and cannot generate meshes with more than 1600 faces. The shape of the input mesh should be sharp enough; otherwise, it will be challenging to represent it with only 1600 faces. Thus, feed-forward 3D generation methods may often produce bad results due to insufficient shape quality. We suggest using results from 3D reconstruction, scanning, SDS-based method (like [DreamCraft3D](https://github.com/deepseek-ai/DreamCraft3D)) or [Rodin](https://hyperhuman.deemos.com/rodin) as the input of MeshAnything.
 - Please refer to https://huggingface.co/spaces/Yiwen-ntu/MeshAnything/tree/main/examples for more examples.

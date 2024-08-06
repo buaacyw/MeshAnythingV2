@@ -207,10 +207,12 @@ If you have any questions, feel free to open a discussion or contact us at <b>yi
 """
 output_model_obj = gr.Model3D(
     label="Generated Mesh (OBJ Format)",
+    display_mode="wireframe",
     clear_color=[1, 1, 1, 1],
 )
 preprocess_model_obj = gr.Model3D(
     label="Processed Input Mesh (OBJ Format)",
+    display_mode="wireframe",
     clear_color=[1, 1, 1, 1],
 )
 input_image_render = gr.Image(
@@ -226,6 +228,7 @@ with (gr.Blocks() as demo):
             with gr.Row():
                 input_3d = gr.Model3D(
                     label="Input Mesh",
+                    display_mode = "wireframe",
                     clear_color=[1,1,1,1],
                 )
 
