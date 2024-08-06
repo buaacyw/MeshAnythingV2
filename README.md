@@ -106,12 +106,13 @@ Our code is based on these wonderful repos:
 
 ## BibTeX
 ```
-@misc{chen2024meshanything,
-  title={MeshAnything: Artist-Created Mesh Generation with Autoregressive Transformers},
-  author={Yiwen Chen and Tong He and Di Huang and Weicai Ye and Sijin Chen and Jiaxiang Tang and Xin Chen and Zhongang Cai and Lei Yang and Gang Yu and Guosheng Lin and Chi Zhang},
-  year={2024},
-  eprint={2406.10163},
-  archivePrefix={arXiv},
-  primaryClass={cs.CV}
+@misc{chen2024meshanythingv2artistcreatedmesh,
+      title={MeshAnything V2: Artist-Created Mesh Generation With Adjacent Mesh Tokenization}, 
+      author={Yiwen Chen and Yikai Wang and Yihao Luo and Zhengyi Wang and Zilong Chen and Jun Zhu and Chi Zhang and Guosheng Lin},
+      year={2024},
+      eprint={2408.02555},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2408.02555}, 
 }
 ```
