@@ -1,15 +1,17 @@
 import torch
-import torch.nn.functional as nnf
 from torch import nn
-import random
 from transformers import AutoModelForCausalLM
 from MeshAnything.miche.encode import load_model
 from MeshAnything.models.shape_opt import ShapeOPTConfig
-from einops import repeat, reduce, rearrange, pack, unpack
+from einops import rearrange
 
-class MeshAnythingV2(nn.Module):
-    def __init__(self):
+from huggingface_hub import PyTorchModelHubMixin
+
+class MeshAnythingV2(nn.Module, PyTorchModelHubMixin,
+                     repo_url="https://github.com/buaacyw/MeshAnythingV2", pipeline_tag="image-to-3d", license="mit"):
+    def __init__(self, config={}):
         super().__init__()
+        self.config = config
         self.point_encoder = load_model(ckpt_path=None)
         self.n_discrete_size = 128
         self.max_seq_ratio = 0.70
