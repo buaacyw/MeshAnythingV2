@@ -46,7 +46,8 @@ def load_model(ckpt_path="MeshAnything/miche/shapevae-256.ckpt"):
         model_config = model_config.model
 
     model = instantiate_from_config(model_config, ckpt_path=ckpt_path)
-    model = model.cuda()
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model.to(device)
     model = model.eval()
 
     return model
