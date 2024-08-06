@@ -8,7 +8,7 @@ from einops import rearrange
 from huggingface_hub import PyTorchModelHubMixin
 
 class MeshAnythingV2(nn.Module, PyTorchModelHubMixin,
-                     repo_url="https://github.com/buaacyw/MeshAnythingV2", pipeline_tag=["image-to-3d"], license="mit"):
+                     repo_url="https://github.com/buaacyw/MeshAnythingV2", pipeline_tag="image-to-3d", license="mit"):
     def __init__(self):
         super().__init__()
         self.point_encoder = load_model(ckpt_path=None)
