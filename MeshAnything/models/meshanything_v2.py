@@ -9,8 +9,9 @@ from huggingface_hub import PyTorchModelHubMixin
 
 class MeshAnythingV2(nn.Module, PyTorchModelHubMixin,
                      repo_url="https://github.com/buaacyw/MeshAnythingV2", pipeline_tag="image-to-3d", license="mit"):
-    def __init__(self):
+    def __init__(self, config=None):
         super().__init__()
+        self.config = config
         self.point_encoder = load_model(ckpt_path=None)
         self.n_discrete_size = 128
         self.max_seq_ratio = 0.70
