@@ -90,7 +90,7 @@ python main.py --input_path pc_examples/mouse.npy --out_dir pc_output --input_ty
 
 ## Important Notes
 - It takes about 8GB and 45s to generate a mesh on an A6000 GPU (depending on the face number of the generated mesh).
-- We suggest using Rodin to first achieve text or image to dense mesh. And then use MeshAnything to obtain Artist-Created Mesh from dense mesh.
+- For text/image to Artist-Create Mesh. We suggest using [Rodin](https://hyperhuman.deemos.com/rodin) to first achieve text or image to dense mesh. And then input the dense mesh to us.
 - The input mesh will be normalized to a unit bounding box. The up vector of the input mesh should be +Y for better results.
 - Limited by computational resources, MeshAnything is trained on meshes with fewer than 1600 faces and cannot generate meshes with more than 1600 faces. The shape of the input mesh should be sharp enough; otherwise, it will be challenging to represent it with only 1600 faces. Thus, feed-forward 3D generation methods may often produce bad results due to insufficient shape quality. We suggest using results from 3D reconstruction, scanning, SDS-based method (like [DreamCraft3D](https://github.com/deepseek-ai/DreamCraft3D)) or [Rodin](https://hyperhuman.deemos.com/rodin) as the input of MeshAnything.
 - Please refer to https://huggingface.co/spaces/Yiwen-ntu/MeshAnything/tree/main/examples for more examples.
