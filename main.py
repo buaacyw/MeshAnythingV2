@@ -14,7 +14,7 @@ from mesh_to_pc import process_mesh_to_pc
 from huggingface_hub import hf_hub_download
 
 class Dataset:
-    def __init__(self, input_type, input_list, mc=False):
+    def __init__(self, input_type, input_list, mc=False, mc_level = 7):
         super().__init__()
         self.data = []
         if input_type == 'pc_normal':
@@ -35,7 +35,7 @@ class Dataset:
                 mesh_list.append(cur_data)
             if mc:
                 print("First Marching Cubes and then sample point cloud, need several minutes...")
-            pc_list, _ = process_mesh_to_pc(mesh_list, marching_cubes=mc)
+            pc_list, _ = process_mesh_to_pc(mesh_list, marching_cubes=mc, mc_level=mc_level)
             for input_path, cur_data in zip(input_list, pc_list):
                 self.data.append({'pc_normal': cur_data, 'uid': input_path.split('/')[-1].split('.')[0]})
         print(f"dataset total data samples: {len(self.data)}")
@@ -77,6 +77,8 @@ def get_args():
     parser.add_argument("--seed", default=0, type=int)
 
     parser.add_argument("--mc", default=False, action="store_true")
+    parser.add_argument("--mc_level", default=7, type=int)
+
     parser.add_argument("--sampling", default=False, action="store_true")
 
     args = parser.parse_args()
@@ -118,10 +120,10 @@ if __name__ == "__main__":
         else:
             input_list = [os.path.join(args.input_dir, x) for x in input_list if x.endswith('.ply') or x.endswith('.obj') or x.endswith('.npy')]
         set_seed(args.seed)
-        dataset = Dataset(args.input_type, input_list, args.mc)
+        dataset = Dataset(args.input_type, input_list, args.mc, args.mc_level)
     elif args.input_path is not None:
         set_seed(args.seed)
-        dataset = Dataset(args.input_type, [args.input_path], args.mc)
+        dataset = Dataset(args.input_type, [args.input_path], args.mc, args.mc_level)
     else:
         raise ValueError("input_dir or input_path must be provided.")
 

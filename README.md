@@ -60,12 +60,21 @@ pip install -U gradio
 ```
 
 ## Usage
+
+### For text/image to Artist-Create Mesh. We suggest using [Rodin](https://hyperhuman.deemos.com/rodin) to first achieve text or image to dense mesh. And then input the dense mesh to us.
+```
+# Put the output obj file of Rodin to rodin_result and using the following command to generate the Artist-Created Mesh.
+# We suggest using the --mc flag to preprocess the input mesh with Marching Cubes first. This helps us to align the inference point cloud to our training domain.
+python main.py --input_dir rodin_result --out_dir mesh_output --input_type mesh --mc
+```
+
 ### Local Gradio Demo <a href='https://github.com/gradio-app/gradio'><img src='https://img.shields.io/github/stars/gradio-app/gradio'></a>
 ```
 python app.py
 ```
 
 ### Mesh Command line inference
+#### Important Notes: If your mesh input is not the result from Marching Cubes, We suggest you to preprocess the mesh with Marching Cubes first (simply by adding --mc).
 ```
 # folder input
 python main.py --input_dir examples --out_dir mesh_output --input_type mesh
@@ -75,7 +84,13 @@ python main.py --input_path examples/wand.obj --out_dir mesh_output --input_type
 
 # Preprocess with Marching Cubes first
 python main.py --input_dir examples --out_dir mesh_output --input_type mesh --mc
+
+# The mc resolution is default to be 128. For some delicate mesh, this resolution is not sufficient. Raise this resolution takes more time to preprocess but should achieve a better result.
+# Change it by : --mc_level 7 -> 128 (2^7), --mc_level 8 -> 256 (2^8).
+# 256 resolution Marching Cube example.
+python main.py --input_dir examples --out_dir mesh_output --input_type mesh --mc --mc_level 8
 ```
+
 ### Point Cloud Command line inference
 ```
 # Note: if you want to use your own point cloud, please make sure the normal is included.
@@ -90,7 +105,6 @@ python main.py --input_path pc_examples/mouse.npy --out_dir pc_output --input_ty
 
 ## Important Notes
 - It takes about 8GB and 45s to generate a mesh on an A6000 GPU (depending on the face number of the generated mesh).
-- For text/image to Artist-Create Mesh. We suggest using [Rodin](https://hyperhuman.deemos.com/rodin) to first achieve text or image to dense mesh. And then input the dense mesh to us.
 - The input mesh will be normalized to a unit bounding box. The up vector of the input mesh should be +Y for better results.
 - Limited by computational resources, MeshAnything is trained on meshes with fewer than 1600 faces and cannot generate meshes with more than 1600 faces. The shape of the input mesh should be sharp enough; otherwise, it will be challenging to represent it with only 1600 faces. Thus, feed-forward 3D generation methods may often produce bad results due to insufficient shape quality. We suggest using results from 3D reconstruction, scanning, SDS-based method (like [DreamCraft3D](https://github.com/deepseek-ai/DreamCraft3D)) or [Rodin](https://hyperhuman.deemos.com/rodin) as the input of MeshAnything.
 - Please refer to https://huggingface.co/spaces/Yiwen-ntu/MeshAnything/tree/main/examples for more examples.
