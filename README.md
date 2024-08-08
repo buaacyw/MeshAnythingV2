@@ -74,7 +74,7 @@ python app.py
 ```
 
 ### Mesh Command line inference
-#### Important Notes: If your mesh input is not the result from Marching Cubes, We suggest you to preprocess the mesh with Marching Cubes first (simply by adding --mc).
+#### Important Notes: If your mesh input is not produced by Marching Cubes, We suggest you to preprocess the mesh with Marching Cubes first (simply by adding --mc).
 ```
 # folder input
 python main.py --input_dir examples --out_dir mesh_output --input_type mesh
