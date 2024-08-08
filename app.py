@@ -5,15 +5,15 @@ from accelerate.utils import set_seed
 from accelerate import Accelerator
 import numpy as np
 import gradio as gr
-from main import load_v2
 from mesh_to_pc import process_mesh_to_pc
 import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from PIL import Image
 import io
+from MeshAnything.models.meshanything_v2 import MeshAnythingV2
 
-model = load_v2()
+model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
 
 device = torch.device('cuda')
 accelerator = Accelerator(

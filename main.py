@@ -1,9 +1,8 @@
-import os, argparse, importlib
+import os, argparse
 import torch
 import time
 import trimesh
 import numpy as np
-from MeshAnything.models.meshanything_v2 import MeshAnythingV2
 import datetime
 from accelerate import Accelerator
 from accelerate.utils import set_seed
@@ -12,6 +11,7 @@ from safetensors.torch import load_model
 
 from mesh_to_pc import process_mesh_to_pc
 from huggingface_hub import hf_hub_download
+from MeshAnything.models.meshanything_v2 import MeshAnythingV2
 
 class Dataset:
     def __init__(self, input_type, input_list, mc=False, mc_level = 7):
@@ -84,19 +84,6 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def load_v2():
-    model = MeshAnythingV2()
-    print("load model over!!!")
-
-    ckpt_path = hf_hub_download(
-        repo_id="Yiwen-ntu/MeshAnythingV2",
-        filename="350m.pth",
-    )
-
-    load_model(model, ckpt_path)
-
-    print("load weights over!!!")
-    return model
 if __name__ == "__main__":
     args = get_args()
 
@@ -110,7 +97,8 @@ if __name__ == "__main__":
         kwargs_handlers=[kwargs]
     )
 
-    model = load_v2()
+    model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
+
     # create dataset
     if args.input_dir is not None:
         input_list = sorted(os.listdir(args.input_dir))
