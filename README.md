@@ -61,16 +61,19 @@ pip install -U gradio
 
 ## Usage
 
+### Implementation of Adjacent Mesh Tokenization and Detokenization
+```
+# We release our adjacent mesh tokenization implementation in adjacent_mesh_tokenization.py.
+# For detokenization please check the function adjacent_detokenize in MeshAnything/models/meshanything_v2.py
+python adjacent_mesh_tokenization.py
+```
+
+
 ### For text/image to Artist-Create Mesh. We suggest using [Rodin](https://hyperhuman.deemos.com/rodin) to first achieve text or image to dense mesh. And then input the dense mesh to us.
 ```
 # Put the output obj file of Rodin to rodin_result and using the following command to generate the Artist-Created Mesh.
 # We suggest using the --mc flag to preprocess the input mesh with Marching Cubes first. This helps us to align the inference point cloud to our training domain.
 python main.py --input_dir rodin_result --out_dir mesh_output --input_type mesh --mc
-```
-
-### Local Gradio Demo <a href='https://github.com/gradio-app/gradio'><img src='https://img.shields.io/github/stars/gradio-app/gradio'></a>
-```
-python app.py
 ```
 
 ### Mesh Command line inference
@@ -101,6 +104,11 @@ python main.py --input_dir pc_examples --out_dir pc_output --input_type pc_norma
 
 # inference for single file
 python main.py --input_path pc_examples/grenade.npy --out_dir pc_output --input_type pc_normal
+```
+
+### Local Gradio Demo <a href='https://github.com/gradio-app/gradio'><img src='https://img.shields.io/github/stars/gradio-app/gradio'></a>
+```
+python app.py
 ```
 
 ## Important Notes
