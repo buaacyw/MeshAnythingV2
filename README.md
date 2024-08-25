@@ -14,7 +14,7 @@
     <br>
     <sup>*</sup>Corresponding authors.
     <br>
-    <sup>1</sup>Nanyang Technological University,
+    <sup>1</sup>S-Lab, Nanyang Technological University,
     <sup>2</sup>Tsinghua University,
     <br>
     <sup>3</sup>Imperial College London,
