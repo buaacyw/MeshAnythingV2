@@ -31,5 +31,5 @@ class MeshImage:
     def IS_CHANGED(s, images):
         return time.time()
     
-class MeshText:
-    pass
+# class MeshText:
+#     pass

@@ -1,8 +1,8 @@
-from .comfyui_meshanything_v2 import MeshImage, MeshText
+from .comfyui_meshanything_v2 import MeshImage
 
 NODE_CLASS_MAPPINGS = {
     "MeshImage": MeshImage,
-    "MeshText": MeshText,
+    # "MeshText": MeshText,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
