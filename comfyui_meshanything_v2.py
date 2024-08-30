@@ -20,13 +20,13 @@ class MeshImage:
 
     OUTPUT_NODE = True
 
-    CATEGORY = "api/image"
+    CATEGORY = "ComfyUI MeshAnythingV2"
 
     def mesh_image(self, image):
         print(image)
         print("Meshing Image...")
         print("Meshing Image Completed...")
-        return image
+        return (image,)
     
     def IS_CHANGED(s, images):
         return time.time()
