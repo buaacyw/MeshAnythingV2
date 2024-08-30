@@ -1,4 +1,4 @@
-import math
+from PIL import Image
 
 """
 The ComfyUI Meshanythingv2 Node simply takes an input image/text/3d Object and turns into a mesh, even smaller size.
@@ -18,7 +18,8 @@ class MeshImage:
   CATEGORY = "image/postprocessing"
   
   def mesh_image(self, image):
-   return image
+    image = image.convert("L")
+    return image
     
 NODE_CLASS_MAPPINGS = {
     "CMA_MeshImage": MeshImage,

@@ -12,3 +12,4 @@ huggingface_hub
 matplotlib
 gradio
 spaces
+Pillow
