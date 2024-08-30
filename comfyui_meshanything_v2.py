@@ -33,12 +33,3 @@ class MeshImage:
     
 class MeshText:
     pass
-
-NODE_CLASS_MAPPINGS = {
-    "MeshImage": MeshImage,
-    "MeshText": MeshText,
-}
-
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "MeshImage": "MeshImage 2"
-}
