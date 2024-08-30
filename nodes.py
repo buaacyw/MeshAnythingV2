@@ -18,8 +18,9 @@ class MeshImage:
   CATEGORY = "image/postprocessing"
   
   def mesh_image(self, image):
-    image = image.convert("L")
-    return image
+    converted_image = Image.fromarray(image)
+    converted_image = converted_image.convert("L")
+    return converted_image
     
 NODE_CLASS_MAPPINGS = {
     "CMA_MeshImage": MeshImage,
