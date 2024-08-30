@@ -13,3 +13,4 @@ matplotlib
 gradio
 spaces
 Pillow
+numpy
