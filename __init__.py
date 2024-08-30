@@ -1,4 +1,4 @@
-from .comfyui_meshanything_v2 import MeshImage
+from .nodes import MeshImage
 
 NODE_CLASS_MAPPINGS = {
     "MeshImage": MeshImage,
