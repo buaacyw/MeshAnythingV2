@@ -3,6 +3,7 @@ from mesh_to_pc import process_mesh_to_pc
 import torch
 import numpy as np
 from PIL import Image
+from numpy import asarray
 
 # Utils
 
@@ -19,7 +20,9 @@ class Dataset:
     if input_type == 'pc_normal':
       for input_path in input_list:
         # load npy
-        cur_data = np.load(input_path)
+        input_data = Image.open(input_path)
+        tdata = asarray(input_data)
+        cur_data = np.load(tdata)
         # sample 4096
         assert cur_data.shape[0] >= 8192, "input pc_normal should have at least 4096 points"
         idx = np.random.choice(cur_data.shape[0], 8192, replace=False)

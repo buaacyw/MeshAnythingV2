@@ -46,6 +46,7 @@ class MeshImage:
     
   RETURN_TYPES = ("IMAGE",)
   FUNCTION = "mesh_image"
+  OUTPUT_NODE = True
 
   CATEGORY = "image/postprocessing"
   
