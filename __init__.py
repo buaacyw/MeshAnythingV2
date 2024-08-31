@@ -1,8 +1,4 @@
-from .nodes import MeshImage
-
-NODE_CLASS_MAPPINGS = {
-    "MeshImage": MeshImage,
-}
+from .nodes import NODE_CLASS_MAPPINGS
 
 print('--------------')
 print('*ComfyUI_MeshAnythingV2- nodes_loaded*')
