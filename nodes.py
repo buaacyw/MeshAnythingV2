@@ -9,7 +9,8 @@ import numpy as np
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
-from MeshAnything.models.meshanything_v2 import MeshAnythingV2
+# from MeshAnything.models.meshanything_v2 import MeshAnythingV2
+from .MeshAnything.models.meshanything_v2 import MeshAnythingV2
 from .utils import Dataset, conv_pil_tensor, conv_tensor_pil, parse_save_filename
 
 
