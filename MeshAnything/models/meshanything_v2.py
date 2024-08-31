@@ -1,11 +1,17 @@
 import torch
 from torch import nn
+import importlib
 from transformers import AutoModelForCausalLM
-from MeshAnything.miche.encode import load_model
-from MeshAnything.models.shape_opt import ShapeOPTConfig
 from einops import rearrange
-
 from huggingface_hub import PyTorchModelHubMixin
+
+# from MeshAnything.miche.encode import load_model
+# from MeshAnything.models.shape_opt import ShapeOPTConfig
+
+meshanythingv2_miche_module = importlib.import_module("MeshAnything.miche.encode", package=__name__)
+load_model = getattr(meshanythingv2_miche_module, "load_model")
+meshanythingv2_models_module = importlib.import_module("MeshAnything.models.shape_opt", package=__name__)
+ShapeOPTConfig = getattr(meshanythingv2_models_module, "ShapeOPTConfig")
 
 class MeshAnythingV2(nn.Module, PyTorchModelHubMixin,
                      repo_url="https://github.com/buaacyw/MeshAnythingV2", pipeline_tag="image-to-3d", license="mit"):
