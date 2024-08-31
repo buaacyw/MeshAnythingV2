@@ -15,10 +15,10 @@ from accelerate.utils import DistributedDataParallelKwargs
 import importlib
 
 
-meshanythingv2_module = importlib.import_module(".MeshAnything.models.meshanything_v2", package=None)
-MeshAnythingV2 = getattr(meshanythingv2_module, "MeshAnythingV2")
+# meshanythingv2_module = importlib.import_module(".MeshAnything.models.meshanything_v2", package=None)
+# MeshAnythingV2 = getattr(meshanythingv2_module, "MeshAnythingV2")
 
-utils_module = importlib.import_module(".utils", package=None)
+utils_module = importlib.import_module(".utils", package=__name__)
 Dataset = getattr(utils_module, 'Dataset')
 conv_pil_tensor = getattr(utils_module, 'conv_pil_tensor')
 conv_tensor_pil = getattr(utils_module, 'conv_tensor_pil')
