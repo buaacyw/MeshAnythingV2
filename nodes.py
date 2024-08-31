@@ -10,8 +10,19 @@ from accelerate import Accelerator
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
 # from MeshAnything.models.meshanything_v2 import MeshAnythingV2
-from .MeshAnything.models.meshanything_v2 import MeshAnythingV2
-from .utils import Dataset, conv_pil_tensor, conv_tensor_pil, parse_save_filename
+# from .MeshAnything.models.meshanything_v2 import MeshAnythingV2
+# from .utils import Dataset, conv_pil_tensor, conv_tensor_pil, parse_save_filename
+import importlib
+
+
+meshanythingv2_module = importlib.import_module(".MeshAnything.models.meshanything_v2", package=__name__)
+MeshAnythingV2 = getattr(meshanythingv2_module, "MeshAnythingV2")
+
+utils_module = importlib.import_module(".utils", package=__name__)
+Dataset = getattr(utils_module, 'Dataset')
+conv_pil_tensor = getattr(utils_module, 'conv_pil_tensor')
+conv_tensor_pil = getattr(utils_module, 'conv_tensor_pil')
+parse_save_filename = getattr(utils_module, 'parse_save_filename')
 
 
 """
