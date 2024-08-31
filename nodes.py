@@ -48,7 +48,7 @@ class GrayScale:
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "grayscale_image"
 
-    CATEGORY = "MeshAnythingV2/process"
+    CATEGORY = "api/image"
 
     def grayscale_image(self, image):
         image = conv_pil_tensor(conv_tensor_pil(image).convert("L"))
@@ -69,7 +69,7 @@ class GrayScale:
 #     FUNCTION = "mesh_image"
 #     OUTPUT_NODE = True
 
-#     CATEGORY = "MeshAnythingV2/process"
+#     CATEGORY = "api/image"
 
 #     def mesh_image(self, image):
 #         cur_time = datetime.datetime.now().strftime("%d_%H-%M-%S")
@@ -163,7 +163,7 @@ class SaveMesh:
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("save_path",)
     FUNCTION = "save_mesh"
-    CATEGORY = "MeshAnythingV2/Import|Export"
+    CATEGORY = "api/image"
 
     def save_mesh(self, mesh, save_path):
         save_path = parse_save_filename(
