@@ -1,4 +1,4 @@
-# import importlib
+import importlib
 
 nodes_module = importlib.import_module("nodes", package=__name__)
 NODE_CLASS_MAPPINGS = getattr(nodes_module, "NODE_CLASS_MAPPINGS")
