@@ -42,18 +42,19 @@ class GrayScale:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "images": ("IMAGE",),
+                "image": ("IMAGE",),
             }
         }
 
     RETURN_TYPES = ("IMAGE",)
+    RETURN_NAMES = ("greyed_image",)
     FUNCTION = "grayscale_image"
 
     CATEGORY = "CMA_V2"
 
-    def grayscale_image(self, images):
+    def grayscale_image(self, image):
         images = []
-        for img in torch_imgs_to_pils(images):
+        for img in torch_imgs_to_pils(image):
             images.append(img.convert("L"))
         images = pils_to_torch_imgs(images)
         return (images,)
