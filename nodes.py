@@ -9,6 +9,7 @@ import numpy as np
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
+
 # from MeshAnything.models.meshanything_v2 import MeshAnythingV2
 # from .MeshAnything.models.meshanything_v2 import MeshAnythingV2
 # from .utils import Dataset, conv_pil_tensor, conv_tensor_pil, parse_save_filename
@@ -19,10 +20,10 @@ import importlib
 # MeshAnythingV2 = getattr(meshanythingv2_module, "MeshAnythingV2")
 
 utils_module = importlib.import_module(".utils", package="comfyui_meshanything_v2")
-Dataset = getattr(utils_module, 'Dataset')
-pils_to_torch_imgs = getattr(utils_module, 'pils_to_torch_imgs')
-torch_imgs_to_pils = getattr(utils_module, 'torch_imgs_to_pils')
-parse_save_filename = getattr(utils_module, 'parse_save_filename')
+Dataset = getattr(utils_module, "Dataset")
+pils_to_torch_imgs = getattr(utils_module, "pils_to_torch_imgs")
+torch_imgs_to_pils = getattr(utils_module, "torch_imgs_to_pils")
+parse_save_filename = getattr(utils_module, "parse_save_filename")
 
 
 """
@@ -51,7 +52,10 @@ class GrayScale:
     CATEGORY = "CMA_V2"
 
     def grayscale_image(self, images):
-        images = pils_to_torch_imgs(torch_imgs_to_pils(images).convert("L"))
+        images = []
+        for img in torch_imgs_to_pils(images):
+            images.append(img.convert("L"))
+        images = pils_to_torch_imgs(images)
         return (images,)
 
 
