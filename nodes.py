@@ -20,8 +20,8 @@ import importlib
 
 utils_module = importlib.import_module(".utils", package="comfyui_meshanything_v2")
 Dataset = getattr(utils_module, 'Dataset')
-conv_pil_tensor = getattr(utils_module, 'conv_pil_tensor')
-conv_tensor_pil = getattr(utils_module, 'conv_tensor_pil')
+pils_to_torch_imgs = getattr(utils_module, 'pils_to_torch_imgs')
+torch_imgs_to_pils = getattr(utils_module, 'torch_imgs_to_pils')
 parse_save_filename = getattr(utils_module, 'parse_save_filename')
 
 
@@ -41,18 +41,18 @@ class GrayScale:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "image": ("IMAGE",),
+                "images": ("IMAGE",),
             }
         }
 
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "grayscale_image"
 
-    CATEGORY = "image/postprecessing"
+    CATEGORY = "CMA_V2"
 
-    def grayscale_image(self, image):
-        image = conv_pil_tensor(conv_tensor_pil(image).convert("L"))
-        return (image,)
+    def grayscale_image(self, images):
+        images = pils_to_torch_imgs(torch_imgs_to_pils(image).convert("L"))
+        return (images,)
 
 
 # class MeshImage:
@@ -69,7 +69,7 @@ class GrayScale:
 #     FUNCTION = "mesh_image"
 #     OUTPUT_NODE = True
 
-#     CATEGORY = "image/postprecessing"
+#     CATEGORY = "CMA_V2"
 
 #     def mesh_image(self, image):
 #         cur_time = datetime.datetime.now().strftime("%d_%H-%M-%S")
@@ -163,7 +163,7 @@ class SaveMesh:
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("save_path",)
     FUNCTION = "save_mesh"
-    CATEGORY = "image/postprecessing"
+    CATEGORY = "CMA_V2"
 
     def save_mesh(self, mesh, save_path):
         save_path = parse_save_filename(

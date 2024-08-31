@@ -7,23 +7,56 @@ from PIL import Image
 from numpy import asarray
 import os
 from os.path import isfile, join, exists, dirname
+import torch.nn.functional as F
+import torchvision.transforms.functional as TF
 import datetime
 import mesh2sdf.core
 import numpy as np
 import skimage.measure
 import trimesh
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 # Utils
 
+# Convert torch images to pillow image
+def torch_imgs_to_pils(images, masks=None, alpha_min=0.1):
+    """
+        images (torch): [N, H, W, C] or [H, W, C]
+        masks (torch): [N, H, W] or [H, W]
+    """
+    if len(images.shape) == 3:
+        images = images.unsqueeze(0)
 
-def conv_pil_tensor(img):
-    return (torch.from_numpy(np.array(img).astype(np.float32) / 255.0).unsqueeze(0),)
+    if masks is not None:
+        if len(masks.shape) == 2:
+            masks = masks.unsqueeze(0)
 
+        inv_mask_index = masks < alpha_min
+        images[inv_mask_index] = 0.
+        
+        masks = masks.unsqueeze(3)
+        images = torch.cat((images, masks), dim=3)
+        mode="RGBA"
+    else:
+        mode="RGB"
 
-def conv_tensor_pil(tsr):
-    return Image.fromarray(
-        np.clip(255.0 * tsr.cpu().numpy().squeeze(), 0, 255).astype(np.uint8)
-    )
+    pil_image_list = [Image.fromarray((images[i].detach().cpu().numpy() * 255).astype(np.uint8), mode=mode) for i in range(images.shape[0])]
 
+    return pil_image_list
+
+def pils_to_torch_imgs(pils: Union[Image.Image, List[Image.Image]], device="cuda", force_rgb=True):
+    if isinstance(pils, Image.Image):
+        pils = [pils]
+    
+    images = []
+    for pil in pils:
+        if pil.mode == "RGBA" and force_rgb:
+            pil = pil.convert('RGB')
+
+        images.append(TF.to_tensor(pil).permute(1, 2, 0))
+
+    images = torch.stack(images, dim=0).to(device)
+
+    return images
 
 def parse_save_filename(save_path, output_directory, supported_extensions, class_name):
 
