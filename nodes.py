@@ -51,7 +51,7 @@ class GrayScale:
     CATEGORY = "CMA_V2"
 
     def grayscale_image(self, images):
-        images = pils_to_torch_imgs(torch_imgs_to_pils(image).convert("L"))
+        images = pils_to_torch_imgs(torch_imgs_to_pils(images).convert("L"))
         return (images,)
 
 
