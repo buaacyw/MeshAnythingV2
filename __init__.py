@@ -1,6 +1,6 @@
 import importlib
 
-nodes_module = importlib.import_module("nodes", package=__name__)
+nodes_module = importlib.import_module(".nodes", package=__name__)
 SaveMesh = getattr(nodes_module, "SaveMesh")
 GrayScale = getattr(nodes_module, "GrayScale")
 
