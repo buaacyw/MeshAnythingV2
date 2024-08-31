@@ -8,9 +8,9 @@ from huggingface_hub import PyTorchModelHubMixin
 # from MeshAnything.miche.encode import load_model
 # from MeshAnything.models.shape_opt import ShapeOPTConfig
 
-meshanythingv2_miche_module = importlib.import_module("MeshAnything.miche.encode", package=__name__)
+meshanythingv2_miche_module = importlib.import_module("MeshAnything.miche.encode", package="MeshAnything.miche.encode")
 load_model = getattr(meshanythingv2_miche_module, "load_model")
-meshanythingv2_models_module = importlib.import_module("MeshAnything.models.shape_opt", package=__name__)
+meshanythingv2_models_module = importlib.import_module("MeshAnything.models.shape_opt", package="MeshAnything.models.shape_opt")
 ShapeOPTConfig = getattr(meshanythingv2_models_module, "ShapeOPTConfig")
 
 class MeshAnythingV2(nn.Module, PyTorchModelHubMixin,
