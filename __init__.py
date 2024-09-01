@@ -1,4 +1,3 @@
-# import importlib
 import os
 import sys
 import folder_paths
@@ -10,9 +9,6 @@ sys.path.append(ROOT_PATH)
 sys.path.append(MODULE_PATH)
 
 from .nodes import NODE_CLASS_MAPPINGS
-
-# nodes_module = importlib.import_module(".nodes", package=__name__)
-# NODE_CLASS_MAPPINGS = getattr(nodes_module, "NODE_CLASS_MAPPINGS")
 
 print('--------------')
 print('*ComfyUI_MeshAnythingV2- nodes_loaded*')

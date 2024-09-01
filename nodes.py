@@ -9,25 +9,9 @@ import numpy as np
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
-from .MeshAnything.models.meshanything_v2 import MeshAnythingV2
-
-import importlib
-
-
-# meshanythingv2_module = importlib.import_module(
-#     ".MeshAnything.models.meshanything_v2", package="comfyui_meshanything_v2"
-# )
-# MeshAnythingV2 = getattr(meshanythingv2_module, "MeshAnythingV2")
-
-utils_module = importlib.import_module(".utils", package="comfyui_meshanything_v2")
-Dataset = getattr(utils_module, "Dataset")
-pils_to_torch_imgs = getattr(utils_module, "pils_to_torch_imgs")
-torch_imgs_to_pils = getattr(utils_module, "torch_imgs_to_pils")
-parse_save_filename = getattr(utils_module, "parse_save_filename")
-
-mesh_module = importlib.import_module(".mesh", package="comfyui_meshanything_v2")
-Mesh = getattr(mesh_module, "Mesh")
-
+from MeshAnything.models.meshanything_v2 import MeshAnythingV2
+from utils import Dataset, pils_to_torch_imgs, torch_imgs_to_pils, parse_save_filename
+from mesh import Mesh
 
 """
 The ComfyUI Meshanythingv2 Node simply takes an input image/text/3d Object and turns into a mesh, even smaller size.

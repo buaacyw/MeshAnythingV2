@@ -7,11 +7,7 @@ import numpy as np
 
 from kiui.op import safe_normalize, dot
 from kiui.typing import *
-import importlib
-
-utils_module = importlib.import_module(".utils", package="comfyui_meshanything_v2")
-prepare_torch_img = getattr(utils_module, "prepare_torch_img")
-SH2RGB = getattr(utils_module, "SH2RGB")
+from utils import prepare_torch_img, SH2RGB
 
 class Mesh:
     """
