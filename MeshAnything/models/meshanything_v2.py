@@ -15,7 +15,7 @@ meshanythingv2_models_module = importlib.import_module(
 ShapeOPTConfig = getattr(meshanythingv2_models_module, "ShapeOPTConfig")
 
 
-class MeshAnythingV2(nn.Module):
+class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
     pass
 
 
