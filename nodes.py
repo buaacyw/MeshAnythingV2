@@ -14,12 +14,17 @@ from accelerate.utils import DistributedDataParallelKwargs
 from .cma_utils import pils_to_torch_imgs, torch_imgs_to_pils, parse_save_filename
 from .mesh import Mesh
 
+DEVICE_STR = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = torch.device(DEVICE_STR)
+
+ROOT_PATH = os.path.join(folder_paths.get_folder_paths("custom_nodes")[0], "ComfyUI-3D-Pack")
+CONFIG_ROOT_PATH = os.path.join(ROOT_PATH, "Configs")
+
 SUPPORTED_3D_EXTENSIONS = (
     ".obj",
     ".ply",
     ".glb",
 )
-
 
 class MeshImage:
     @classmethod
@@ -164,64 +169,6 @@ class LoadInputType:
         return (input_type,)
 
 
-class ImageTo3DMeshNode:
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {"required": {"image": ("IMAGE",)}}
-
-    RETURN_TYPES = ("MESH",)
-    RETURN_NAMES = ("mesh",)
-
-    FUNCTION = "convert_image_to_mesh"
-    CATEGORY = "CMA_V2"
-
-    OUTPUT_NODE = True
-
-    @classmethod
-    def convert_image_to_mesh(cls, image):
-        try:
-            mesh = None
-            image = Image.fromarray(
-                np.clip(255.0 * image.cpu().numpy(), 0, 255).astype(np.uint8)
-            )
-            width, height = image.size
-            pixels = np.array(image)
-
-            # Create a mesh from the heightmap
-            vertices = []
-            faces = []
-
-            # Generate vertices
-            for i in range(height):
-                for j in range(width):
-                    # Normalize pixel values to a range (e.g., 0 to 1) and scale as needed
-                    z = pixels[i, j] / 255.0  # Normalize to 0-1 range
-                    vertices.append([j, i, z])
-
-            # Generate faces
-            for i in range(height - 1):
-                for j in range(width - 1):
-                    # Create two triangular faces for each square
-                    faces.append(
-                        [i * width + j, (i + 1) * width + j, (i + 1) * width + j + 1]
-                    )
-                    faces.append(
-                        [i * width + j, (i + 1) * width + j + 1, i * width + j + 1]
-                    )
-
-            # Convert to numpy arrays
-            vertices = np.array(vertices)
-            faces = np.array(faces)
-
-            # Create the mesh
-            mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
-            mesh = Mesh.load_trimesh(mesh)
-            return (mesh,)
-        except Exception as e:
-            print(e)
-            raise ValueError("Invalid image")
-
-
 class PreviewMesh:
     @classmethod
     def INPUT_TYPES(cls):
@@ -258,6 +205,28 @@ class PreviewMesh:
         ]
         return {"ui": {"previews": previews}, "result": ()}
 
+class SaveImageToNpyNode:
+    @classmethod
+    def INPUT_TYPES(s):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("npy_file_path",)
+    FUNCTION = "image_to_npy"
+
+    CATEGORY = "CMA_V2"
+
+    def image_to_npy(self, images):
+        image = torch_imgs_to_pils(images)[0]
+        img_array = np.asarray(image)
+        file_name = datetime.datetime.now().strftime("%d_%H-%M-%S") + ".npy"
+        file_path = os.path.join(folder_paths.output_directory, file_name)
+        np.save(file_path, img_array)
+        return (file_path,)
 
 NODE_CLASS_MAPPINGS = {
     "CMA_MeshImage": MeshImage,
@@ -265,6 +234,6 @@ NODE_CLASS_MAPPINGS = {
     "CMA_GrayScale": GrayScale,
     "CMA_LoadMesh": LoadMesh,
     "CMA_LoadInputTYpe": LoadInputType,
-    "CMA_ImageToMesh": ImageTo3DMeshNode,
+    "CMA_SaveImageToNpyNode": SaveImageToNpyNode,
     "CMA_PreviewMesh": PreviewMesh,
 }
