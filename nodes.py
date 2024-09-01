@@ -254,6 +254,9 @@ class ImageTo3DMeshNode:
 
     @classmethod
     def convert_image_to_mesh(cls, image):
+        if isinstance(image, torch.Tensor):
+            # Convert the tensor to a NumPy array
+            image = image.cpu().numpy()
         # Convert the image to grayscale
         print(type(image), image)
         image = Image.fromarray(image).convert("L")
@@ -285,10 +288,9 @@ class ImageTo3DMeshNode:
                         ]
                     )
 
+        print("DONE!!!!")
         # Create the mesh
         mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
-        print(type(mesh))
-        print(mesh)
         return (mesh,)
 
 
