@@ -245,9 +245,9 @@ class ImageTo3DMeshNode:
         return {"required": {"image": ("IMAGE")}}
 
     RETURN_TYPES = ("MESH",)
+    RETURN_NAMES = ("mesh",)
 
     FUNCTION = "convert_image_to_mesh"
-
     CATEGORY = "CMA_V2"
 
     OUTPUT_NODE = True
@@ -255,6 +255,7 @@ class ImageTo3DMeshNode:
     @classmethod
     def convert_image_to_mesh(cls, image):
         # Convert the image to grayscale
+        print(type(image), image)
         image = Image.fromarray(image).convert("L")
         image_array = np.array(image)
 
@@ -286,7 +287,8 @@ class ImageTo3DMeshNode:
 
         # Create the mesh
         mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
-
+        print(type(mesh))
+        print(mesh)
         return (mesh,)
 
 
