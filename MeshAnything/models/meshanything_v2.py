@@ -14,8 +14,10 @@ meshanythingv2_models_module = importlib.import_module(
 )
 ShapeOPTConfig = getattr(meshanythingv2_models_module, "ShapeOPTConfig")
 
-class MeshAnythingV2():
+
+class MeshAnythingV2(nn.Module):
     pass
+
 
 # class MeshAnythingV2(
 #     nn.Module,
