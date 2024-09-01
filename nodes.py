@@ -287,7 +287,7 @@ class ImageTo3DMeshNode:
         # Create the mesh
         mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
 
-        return mesh
+        return (mesh,)
 
 
 NODE_CLASS_MAPPINGS = {
