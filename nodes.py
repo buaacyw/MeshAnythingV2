@@ -203,7 +203,11 @@ class LoadMesh:
     def load_mesh(cls, mesh_path):
         # Load the mesh using trimesh library
         if os.path.exists(mesh_path):
+            print("Mesh exists")
             mesh = trimesh.load(mesh_path)
+            print(mesh.vertices)  # Access vertices
+            print(mesh.faces)      # Access faces
+            print(mesh.volume)     # Access volume
             return mesh
         else:
             raise ValueError("Mesh file not found")
