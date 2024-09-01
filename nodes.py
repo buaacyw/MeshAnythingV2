@@ -101,7 +101,7 @@ class MeshImage:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "mesh_path": ("STRING",)
+                "mesh": ("MESH",),
             }
         }
 
@@ -111,7 +111,8 @@ class MeshImage:
 
     CATEGORY = "CMA_V2"
 
-    def mesh_image(self, mesh_path):
+    def mesh_image(self, mesh):
+        print(mesh)
         checkpoint_dir = os.path.join(folder_paths.output_directory, "meshanythingv2")
         os.makedirs(checkpoint_dir, exist_ok=True)
         kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
@@ -121,7 +122,7 @@ class MeshImage:
             kwargs_handlers=[kwargs]
         )
 
-        # model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
+        model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
 
 
 class LoadMesh:
