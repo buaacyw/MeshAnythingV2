@@ -71,14 +71,17 @@ class MeshImage:
     CATEGORY = "CMA_V2"
 
     def mesh_image(self, input_path, input_type, out_dir):
+        print("Setup accelerartor")
         os.makedirs(out_dir, exist_ok=True)
         kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
         accelerator = Accelerator(
             mixed_precision="fp16", project_dir=out_dir, kwargs_handlers=[kwargs]
         )
 
+        print("Setup model")
         model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
 
+        print("Setup dataset")
         set_seed(self.SEED)
         dataset = Dataset(input_type, [input_path], self.MC, self.MC_LEVEL)
         dataloader = torch.utils.data.DataLoader(
@@ -88,6 +91,7 @@ class MeshImage:
             shuffle=False,
         )
 
+        print("Prepare generation start")
         if accelerator.state.num_processes > 1:
             model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
         dataloader, model = accelerator.prepare(dataloader, model)
