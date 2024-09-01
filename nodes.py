@@ -189,54 +189,24 @@ class SaveMesh:
 class LoadMesh:
     @classmethod
     def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "mesh_file_path": ("STRING", {"default": "", "multiline": False}),
-                "resize": (
-                    "BOOLEAN",
-                    {"default": False},
-                ),
-                "renormal": (
-                    "BOOLEAN",
-                    {"default": True},
-                ),
-                "retex": (
-                    "BOOLEAN",
-                    {"default": False},
-                ),
-                "optimizable": (
-                    "BOOLEAN",
-                    {"default": False},
-                ),
-            },
-        }
+        return {"required": {"mesh_path": ("STRING", {"default": ""})}}
 
     RETURN_TYPES = ("MESH",)
-    RETURN_NAMES = ("mesh",)
+
     FUNCTION = "load_mesh"
-    CATEGORY = "CMA_V2"
 
-    # def load_mesh(self, mesh_file_path, resize, renormal, retex, optimizable):
-    def load_mesh(self, mesh_file_path):
-        mesh = trimesh.load(mesh_file_path)
-        print(mesh)
-        return (mesh,)
-        # if not os.path.isabs(mesh_file_path):
-        #     mesh_file_path = os.path.join(folder_paths.input_directory, mesh_file_path)
+    CATEGORY = "3D"
 
-        # if os.path.exists(mesh_file_path):
-        #     folder, filename = os.path.split(mesh_file_path)
-        #     if filename.lower().endswith(SUPPORTED_3D_EXTENSIONS):
-        #         with torch.inference_mode(not optimizable):
-        #             mesh = Mesh.load(mesh_file_path, resize, renormal, retex)
-        #     else:
-        #         print(
-        #             f"[{self.__class__.__name__}] File name {filename} does not end with supported 3D file extensions: {SUPPORTED_3D_EXTENSIONS}"
-        #         )
-        # else:
-        #     print(f"[{self.__class__.__name__}] File {mesh_file_path} does not exist")
-        # return (mesh,)
+    OUTPUT_NODE = True
 
+    @classmethod
+    def load_mesh(cls, mesh_path):
+        # Load the mesh using trimesh library
+        if os.path.exists(mesh_path):
+            mesh = trimesh.load(mesh_path)
+            return mesh
+        else:
+            raise ValueError("Mesh file not found")
 
 NODE_CLASS_MAPPINGS = {
     # "CMA_MeshImage": MeshImage,
