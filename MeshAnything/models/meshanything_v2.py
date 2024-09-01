@@ -10,6 +10,12 @@ from huggingface_hub import PyTorchModelHubMixin
 class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
     def __init__(self, config={}):
         super().__init__()
+        
+        # custom
+        self.repo_url="https://github.com/buaacyw/MeshAnythingV2"
+        self.pipeline_tag="image-to-3d"
+        self.license="mit"
+
         self.config = config
         self.point_encoder = load_model(ckpt_path=None)
         self.n_discrete_size = 128
@@ -52,11 +58,6 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
 
         self.cond_head_proj = nn.Linear(self.cond_dim, self.config.word_embed_proj_dim)
         self.cond_proj = nn.Linear(self.cond_dim * 2, self.config.word_embed_proj_dim)
-
-        # custom
-        self.repo_url="https://github.com/buaacyw/MeshAnythingV2"
-        self.pipeline_tag="image-to-3d"
-        self.license="mit"
 
         self.eval()
 
