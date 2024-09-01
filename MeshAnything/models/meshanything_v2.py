@@ -7,8 +7,7 @@ from einops import rearrange
 
 from huggingface_hub import PyTorchModelHubMixin
 
-class MeshAnythingV2(nn.Module, PyTorchModelHubMixin,
-                     repo_url="https://github.com/buaacyw/MeshAnythingV2", pipeline_tag="image-to-3d", license="mit"):
+class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
     def __init__(self, config={}):
         super().__init__()
         self.config = config
@@ -53,6 +52,11 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin,
 
         self.cond_head_proj = nn.Linear(self.cond_dim, self.config.word_embed_proj_dim)
         self.cond_proj = nn.Linear(self.cond_dim * 2, self.config.word_embed_proj_dim)
+
+        # custom
+        self.repo_url="https://github.com/buaacyw/MeshAnythingV2"
+        self.pipeline_tag="image-to-3d"
+        self.license="mit"
 
         self.eval()
 
