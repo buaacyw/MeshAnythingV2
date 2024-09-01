@@ -10,7 +10,7 @@ from accelerate import Accelerator
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
 # from MeshAnything.models.meshanything_v2 import MeshAnythingV2
-from utils import Dataset, pils_to_torch_imgs, torch_imgs_to_pils, parse_save_filename
+from cma_utils import pils_to_torch_imgs, torch_imgs_to_pils, parse_save_filename
 from mesh import Mesh
 
 SUPPORTED_3D_EXTENSIONS = (
