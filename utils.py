@@ -17,6 +17,10 @@ import trimesh
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 # Utils
 
+C0 = 0.28209479177387814
+def SH2RGB(sh):
+    return sh * C0 + 0.5
+
 # Convert torch images to pillow image
 def torch_imgs_to_pils(images):
     converted_images = []
