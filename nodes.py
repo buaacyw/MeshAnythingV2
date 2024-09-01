@@ -13,10 +13,10 @@ from accelerate.utils import DistributedDataParallelKwargs
 import importlib
 
 
-meshanythingv2_module = importlib.import_module(
-    ".MeshAnything.models.meshanything_v2", package="comfyui_meshanything_v2"
-)
-MeshAnythingV2 = getattr(meshanythingv2_module, "MeshAnythingV2")
+# meshanythingv2_module = importlib.import_module(
+#     ".MeshAnything.models.meshanything_v2", package="comfyui_meshanything_v2"
+# )
+# MeshAnythingV2 = getattr(meshanythingv2_module, "MeshAnythingV2")
 
 utils_module = importlib.import_module(".utils", package="comfyui_meshanything_v2")
 Dataset = getattr(utils_module, "Dataset")
