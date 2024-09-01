@@ -110,7 +110,7 @@ class MeshImage:
 
     CATEGORY = "CMA_V2"
 
-    def mesh_image(self, image):
+    def mesh_image(self, mesh_path):
         checkpoint_dir = os.path.join(folder_paths.output_directory, "meshanythingv2")
         os.makedirs(checkpoint_dir, exist_ok=True)
         kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
