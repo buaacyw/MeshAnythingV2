@@ -120,7 +120,7 @@ class MeshImage:
             kwargs_handlers=[kwargs]
         )
 
-        model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
+        # model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
 
 
 class LoadMesh:
