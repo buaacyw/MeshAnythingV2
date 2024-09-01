@@ -65,7 +65,7 @@ class MeshImage:
         }
 
     RETURN_TYPES = ("MESH",)
-    FUNCTION = "load_mesh"
+    FUNCTION = "mesh_image"
     OUTPUT_NODE = True
 
     CATEGORY = "CMA_V2"
