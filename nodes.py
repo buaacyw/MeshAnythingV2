@@ -216,24 +216,26 @@ class LoadMesh:
     FUNCTION = "load_mesh"
     CATEGORY = "CMA_V2"
 
-    def load_mesh(self, mesh_file_path, resize, renormal, retex, optimizable):
-        mesh = None
-
-        if not os.path.isabs(mesh_file_path):
-            mesh_file_path = os.path.join(folder_paths.input_directory, mesh_file_path)
-
-        if os.path.exists(mesh_file_path):
-            folder, filename = os.path.split(mesh_file_path)
-            if filename.lower().endswith(SUPPORTED_3D_EXTENSIONS):
-                with torch.inference_mode(not optimizable):
-                    mesh = Mesh.load(mesh_file_path, resize, renormal, retex)
-            else:
-                print(
-                    f"[{self.__class__.__name__}] File name {filename} does not end with supported 3D file extensions: {SUPPORTED_3D_EXTENSIONS}"
-                )
-        else:
-            print(f"[{self.__class__.__name__}] File {mesh_file_path} does not exist")
+    # def load_mesh(self, mesh_file_path, resize, renormal, retex, optimizable):
+    def load_mesh(self, mesh_file_path):
+        mesh = trimesh.load(mesh_file_path)
+        print(mesh)
         return (mesh,)
+        # if not os.path.isabs(mesh_file_path):
+        #     mesh_file_path = os.path.join(folder_paths.input_directory, mesh_file_path)
+
+        # if os.path.exists(mesh_file_path):
+        #     folder, filename = os.path.split(mesh_file_path)
+        #     if filename.lower().endswith(SUPPORTED_3D_EXTENSIONS):
+        #         with torch.inference_mode(not optimizable):
+        #             mesh = Mesh.load(mesh_file_path, resize, renormal, retex)
+        #     else:
+        #         print(
+        #             f"[{self.__class__.__name__}] File name {filename} does not end with supported 3D file extensions: {SUPPORTED_3D_EXTENSIONS}"
+        #         )
+        # else:
+        #     print(f"[{self.__class__.__name__}] File {mesh_file_path} does not exist")
+        # return (mesh,)
 
 
 NODE_CLASS_MAPPINGS = {
