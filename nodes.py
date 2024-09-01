@@ -195,7 +195,7 @@ class LoadMesh:
 
     FUNCTION = "load_mesh"
 
-    CATEGORY = "3D"
+    CATEGORY = "CMA_V2"
 
     OUTPUT_NODE = True
 
@@ -205,16 +205,96 @@ class LoadMesh:
         if os.path.exists(mesh_path):
             print("Mesh exists")
             mesh = trimesh.load(mesh_path)
-            print(mesh.vertices)  # Access vertices
-            print(mesh.faces)      # Access faces
-            print(mesh.volume)     # Access volume
+
             return mesh
         else:
             raise ValueError("Mesh file not found")
+
+
+class LoadInputType:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "input_type": (
+                    [
+                        "pc_normal",
+                        "mesh",
+                    ],
+                )
+            }
+        }
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("input_type",)
+
+    FUNCTION = "select_input"
+
+    CATEGORY = "CMA_V2"
+
+    OUTPUT_NODE = True
+
+    @classmethod
+    def select_input(cls, input_type):
+        return (input_type,)
+
+
+class ImageTo3DMeshNode:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {"required": {"image": ("IMAGE")}}
+
+    RETURN_TYPES = ("IMAGE",)
+
+    FUNCTION = "convert_image_to_mesh"
+
+    CATEGORY = "3D"
+
+    OUTPUT_NODE = True
+
+    @classmethod
+    def convert_image_to_mesh(cls, image):
+        # Convert the image to grayscale
+        image = Image.fromarray(image).convert("L")
+        image_array = np.array(image)
+
+        # Simple example: Create a heightmap-based mesh
+        heightmap = image_array / 255.0  # Normalize to [0, 1] range
+        heightmap = heightmap * 10.0  # Scale height values
+
+        # Create vertices and faces for the mesh
+        vertices = []
+        faces = []
+        for i in range(heightmap.shape):
+            for j in range(heightmap.shape):
+                vertices.append([i, j, heightmap[i, j]])
+                if i < heightmap.shape - 1 and j < heightmap.shape - 1:
+                    faces.append(
+                        [
+                            i * heightmap.shape + j,
+                            (i + 1) * heightmap.shape + j,
+                            (i + 1) * heightmap.shape + j + 1,
+                        ]
+                    )
+                    faces.append(
+                        [
+                            i * heightmap.shape + j,
+                            (i + 1) * heightmap.shape + j + 1,
+                            i * heightmap.shape + j + 1,
+                        ]
+                    )
+
+        # Create the mesh
+        mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
+
+        return mesh
+
 
 NODE_CLASS_MAPPINGS = {
     # "CMA_MeshImage": MeshImage,
     "CMA_SaveMesh": SaveMesh,
     "CMA_GrayScale": GrayScale,
     "CMA_LoadMesh": LoadMesh,
+    "CMA_LoadInputTYpe": LoadInputType,
+    "CMA_ImageToMesh": ImageTo3DMeshNode,
 }
