@@ -7,7 +7,7 @@ import numpy as np
 
 from kiui.op import safe_normalize, dot
 from kiui.typing import *
-from cma_utils import prepare_torch_img, SH2RGB
+from .cma_utils import prepare_torch_img, SH2RGB
 
 class Mesh:
     """
