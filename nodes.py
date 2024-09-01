@@ -110,7 +110,7 @@ class LoadMesh:
         return {"required": {"mesh_path": ("STRING", {"default": ""})}}
 
     RETURN_TYPES = ("MESH", "STRING")
-    RETURN_NAMES = ("mesh", "mesh_path")
+    RETURN_NAMES = ("mesh", "mesh_file_path")
     FUNCTION = "load_mesh"
     CATEGORY = "CMA_V2"
 
