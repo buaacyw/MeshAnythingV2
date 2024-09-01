@@ -25,7 +25,7 @@ torch_imgs_to_pils = getattr(utils_module, "torch_imgs_to_pils")
 parse_save_filename = getattr(utils_module, "parse_save_filename")
 
 mesh_module = importlib.import_module(".mesh", package="comfyui_meshanything_v2")
-Mesh = getattr(utils_module, "Mesh")
+Mesh = getattr(mesh_module, "Mesh")
 
 
 """
