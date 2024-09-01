@@ -162,7 +162,7 @@ class LoadInputType:
 class ImageTo3DMeshNode:
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"images": ("IMAGE",)}}
+        return {"required": {"image": ("IMAGE",)}}
 
     RETURN_TYPES = ("MESH",)
     RETURN_NAMES = ("mesh",)
