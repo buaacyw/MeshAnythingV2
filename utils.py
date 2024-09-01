@@ -9,6 +9,7 @@ import os
 from os.path import isfile, join, exists, dirname
 import torch.nn.functional as F
 import torchvision.transforms.functional as TF
+import torch.nn.functional as F
 import datetime
 import mesh2sdf.core
 import numpy as np
@@ -29,6 +30,14 @@ def torch_imgs_to_pils(images):
       img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
       converted_images.append(img)
     return converted_images
+
+def prepare_torch_img(img, size_H, size_W, device="cuda", keep_shape=False):
+    # [N, H, W, C] -> [N, C, H, W]
+    img_new = img.permute(0, 3, 1, 2).to(device)
+    img_new = F.interpolate(img_new, (size_H, size_W), mode="bilinear", align_corners=False).contiguous()
+    if keep_shape:
+        img_new = img_new.permute(0, 2, 3, 1)
+    return img_new
 
 def pils_to_torch_imgs(pil_images):
     images = []
