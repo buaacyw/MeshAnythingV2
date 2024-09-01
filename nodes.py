@@ -9,6 +9,7 @@ import numpy as np
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
+
 # from MeshAnything.models.meshanything_v2 import MeshAnythingV2
 from .cma_utils import pils_to_torch_imgs, torch_imgs_to_pils, parse_save_filename
 from .mesh import Mesh
@@ -18,6 +19,7 @@ SUPPORTED_3D_EXTENSIONS = (
     ".ply",
     ".glb",
 )
+
 
 class MeshImage:
     @classmethod
@@ -40,9 +42,7 @@ class MeshImage:
         os.makedirs(checkpoint_dir, exist_ok=True)
         kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
         accelerator = Accelerator(
-            mixed_precision="fp16",
-            project_dir=checkpoint_dir,
-            kwargs_handlers=[kwargs]
+            mixed_precision="fp16", project_dir=checkpoint_dir, kwargs_handlers=[kwargs]
         )
 
         # model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
@@ -109,10 +109,9 @@ class LoadMesh:
     def INPUT_TYPES(cls):
         return {"required": {"mesh_path": ("STRING", {"default": ""})}}
 
-    RETURN_TYPES = ("MESH",)
-
+    RETURN_TYPES = ("MESH", "STRING")
+    RETURN_NAMES = ("mesh", "mesh_path")
     FUNCTION = "load_mesh"
-
     CATEGORY = "CMA_V2"
 
     OUTPUT_NODE = True
@@ -125,11 +124,16 @@ class LoadMesh:
                 with torch.inference_mode(True):
                     mesh = Mesh.load(mesh_path)
             else:
-                print(f"[LoadMesh] File name {filename} does not end with supported 3D file extensions: {SUPPORTED_3D_EXTENSIONS}")
-        else:        
+                print(
+                    f"[LoadMesh] File name {filename} does not end with supported 3D file extensions: {SUPPORTED_3D_EXTENSIONS}"
+                )
+        else:
             print(f"[LoadMesh] File {mesh_path} does not exist")
             raise ValueError("Invalid file path")
-        return (mesh, )
+        return (
+            mesh,
+            mesh_path,
+        )
 
 
 class LoadInputType:
@@ -177,7 +181,9 @@ class ImageTo3DMeshNode:
     def convert_image_to_mesh(cls, image):
         try:
             mesh = None
-            image = Image.fromarray(np.clip(255. * image.cpu().numpy(), 0, 255).astype(np.uint8))
+            image = Image.fromarray(
+                np.clip(255.0 * image.cpu().numpy(), 0, 255).astype(np.uint8)
+            )
             width, height = image.size
             pixels = np.array(image)
 
@@ -196,8 +202,12 @@ class ImageTo3DMeshNode:
             for i in range(height - 1):
                 for j in range(width - 1):
                     # Create two triangular faces for each square
-                    faces.append([i * width + j, (i + 1) * width + j, (i + 1) * width + j + 1])
-                    faces.append([i * width + j, (i + 1) * width + j + 1, i * width + j + 1])
+                    faces.append(
+                        [i * width + j, (i + 1) * width + j, (i + 1) * width + j + 1]
+                    )
+                    faces.append(
+                        [i * width + j, (i + 1) * width + j + 1, i * width + j + 1]
+                    )
 
             # Convert to numpy arrays
             vertices = np.array(vertices)
@@ -211,37 +221,43 @@ class ImageTo3DMeshNode:
             print(e)
             raise ValueError("Invalid image")
 
+
 class PreviewMesh:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "mesh_file_path": ("STRING", {"default": '', "multiline": False}),
+                "mesh_file_path": ("STRING", {"default": "", "multiline": False}),
             },
         }
-    
+
     OUTPUT_NODE = True
     RETURN_TYPES = ()
     FUNCTION = "preview_mesh"
     CATEGORY = "CMA_V2"
 
     def preview_mesh(self, mesh_file_path):
-        
+
         mesh_folder_path, filename = os.path.split(mesh_file_path)
-        
+
         if not os.path.isabs(mesh_file_path):
-            mesh_file_path = os.path.join(folder_paths.output_directory, mesh_folder_path)
-        
+            mesh_file_path = os.path.join(
+                folder_paths.output_directory, mesh_folder_path
+            )
+
         if not filename.lower().endswith(SUPPORTED_3D_EXTENSIONS):
-            print(f"[MeshImage] File name {filename} does not end with supported 3D file extensions: {SUPPORTED_3D_EXTENSIONS}")
+            print(
+                f"[MeshImage] File name {filename} does not end with supported 3D file extensions: {SUPPORTED_3D_EXTENSIONS}"
+            )
             mesh_file_path = ""
-        
+
         previews = [
             {
                 "filepath": mesh_file_path,
             }
         ]
         return {"ui": {"previews": previews}, "result": ()}
+
 
 NODE_CLASS_MAPPINGS = {
     "CMA_MeshImage": MeshImage,
@@ -250,5 +266,5 @@ NODE_CLASS_MAPPINGS = {
     "CMA_LoadMesh": LoadMesh,
     "CMA_LoadInputTYpe": LoadInputType,
     "CMA_ImageToMesh": ImageTo3DMeshNode,
-    "CMA_PreviewMesh": PreviewMesh
+    "CMA_PreviewMesh": PreviewMesh,
 }
