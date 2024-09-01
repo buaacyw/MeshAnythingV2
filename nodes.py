@@ -173,10 +173,10 @@ class ImageTo3DMeshNode:
     OUTPUT_NODE = True
 
     @classmethod
-    def convert_image_to_mesh(cls, images):
+    def convert_image_to_mesh(cls, image):
         try:
             mesh = None
-            image = torch_imgs_to_pils(images)[0]
+            image = Image.fromarray(np.clip(255. * image.cpu().numpy(), 0, 255).astype(np.uint8))
             width, height = image.size
             pixels = np.array(image)
 
