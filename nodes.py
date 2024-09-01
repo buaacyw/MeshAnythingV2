@@ -244,11 +244,11 @@ class ImageTo3DMeshNode:
     def INPUT_TYPES(cls):
         return {"required": {"image": ("IMAGE")}}
 
-    RETURN_TYPES = ("IMAGE",)
+    RETURN_TYPES = ("MESH",)
 
     FUNCTION = "convert_image_to_mesh"
 
-    CATEGORY = "3D"
+    CATEGORY = "CMA_V2"
 
     OUTPUT_NODE = True
 
