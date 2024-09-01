@@ -7,14 +7,15 @@ from einops import rearrange
 
 from huggingface_hub import PyTorchModelHubMixin
 
+
 class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
+    # custom
+    repo_url = "https://github.com/buaacyw/MeshAnythingV2"
+    pipeline_tag = "image-to-3d"
+    license = "mit"
+
     def __init__(self, config={}):
         super().__init__()
-        
-        # custom
-        self.repo_url="https://github.com/buaacyw/MeshAnythingV2"
-        self.pipeline_tag="image-to-3d"
-        self.license="mit"
 
         self.config = config
         self.point_encoder = load_model(ckpt_path=None)
@@ -25,7 +26,11 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
         self.cond_dim = 768
         self.pad_id = -1
         self.n_max_triangles = 1600
-        self.max_length = int(self.n_max_triangles * self.face_per_token * self.max_seq_ratio + 3 + self.cond_length) # add 1
+        self.max_length = int(
+            self.n_max_triangles * self.face_per_token * self.max_seq_ratio
+            + 3
+            + self.cond_length
+        )  # add 1
 
         self.coor_continuous_range = (-0.5, 0.5)
 
@@ -34,7 +39,7 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
             n_positions=self.max_length,
             max_position_embeddings=self.max_length,
             vocab_size=self.n_discrete_size + 4,
-            _attn_implementation="flash_attention_2"
+            _attn_implementation="flash_attention_2",
         )
 
         self.bos_token_id = 0
@@ -44,7 +49,7 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
         self.config.bos_token_id = self.bos_token_id
         self.config.eos_token_id = self.eos_token_id
         self.config.pad_token_id = self.pad_token_id
-        self.config._attn_implementation="flash_attention_2"
+        self.config._attn_implementation = "flash_attention_2"
         self.config.n_discrete_size = self.n_discrete_size
         self.config.face_per_token = self.face_per_token
         self.config.cond_length = self.cond_length
@@ -52,7 +57,7 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
         if self.config.word_embed_proj_dim != self.config.hidden_size:
             self.config.word_embed_proj_dim = self.config.hidden_size
         self.transformer = AutoModelForCausalLM.from_config(
-            config=self.config, use_flash_attention_2 = True
+            config=self.config, use_flash_attention_2=True
         )
         self.transformer.to_bettertransformer()
 
@@ -62,41 +67,57 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
         self.eval()
 
     def adjacent_detokenize(self, input_ids):
-        input_ids = input_ids.reshape(input_ids.shape[0], -1) # B x L
+        input_ids = input_ids.reshape(input_ids.shape[0], -1)  # B x L
         batch_size = input_ids.shape[0]
-        continuous_coors = torch.zeros((batch_size, self.n_max_triangles * 3 * 10, 3), device=input_ids.device)
-        continuous_coors[...] = float('nan')
+        continuous_coors = torch.zeros(
+            (batch_size, self.n_max_triangles * 3 * 10, 3), device=input_ids.device
+        )
+        continuous_coors[...] = float("nan")
 
         for i in range(batch_size):
             cur_ids = input_ids[i]
             coor_loop_check = 0
             vertice_count = 0
-            continuous_coors[i, :3, :] = torch.tensor([[-0.1, 0.0, 0.1], [-0.1, 0.1, 0.2], [-0.3, 0.3, 0.2]],
-                                                      device=input_ids.device)
+            continuous_coors[i, :3, :] = torch.tensor(
+                [[-0.1, 0.0, 0.1], [-0.1, 0.1, 0.2], [-0.3, 0.3, 0.2]],
+                device=input_ids.device,
+            )
             for id in cur_ids:
                 if id == self.pad_id:
                     break
                 elif id == self.n_discrete_size:
                     if coor_loop_check < 9:
                         break
-                    if coor_loop_check % 3 !=0:
+                    if coor_loop_check % 3 != 0:
                         break
                     coor_loop_check = 0
                 else:
 
                     if coor_loop_check % 3 == 0 and coor_loop_check >= 9:
-                        continuous_coors[i, vertice_count] = continuous_coors[i, vertice_count-2]
-                        continuous_coors[i, vertice_count+1] = continuous_coors[i, vertice_count-1]
+                        continuous_coors[i, vertice_count] = continuous_coors[
+                            i, vertice_count - 2
+                        ]
+                        continuous_coors[i, vertice_count + 1] = continuous_coors[
+                            i, vertice_count - 1
+                        ]
                         vertice_count += 2
-                    continuous_coors[i, vertice_count, coor_loop_check % 3] = undiscretize(id, self.coor_continuous_range[0], self.coor_continuous_range[1], self.n_discrete_size)
+                    continuous_coors[i, vertice_count, coor_loop_check % 3] = (
+                        undiscretize(
+                            id,
+                            self.coor_continuous_range[0],
+                            self.coor_continuous_range[1],
+                            self.n_discrete_size,
+                        )
+                    )
                     if coor_loop_check % 3 == 2:
                         vertice_count += 1
                     coor_loop_check += 1
 
-        continuous_coors = rearrange(continuous_coors, 'b (nf nv) c -> b nf nv c', nv=3, c=3)
+        continuous_coors = rearrange(
+            continuous_coors, "b (nf nv) c -> b nf nv c", nv=3, c=3
+        )
 
-        return continuous_coors # b, nf, 3, 3
-
+        return continuous_coors  # b, nf, 3, 3
 
     def forward(self, data_dict: dict, is_eval: bool = False) -> dict:
         if not is_eval:
@@ -105,11 +126,18 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
             return self.generate(data_dict)
 
     def process_point_feature(self, point_feature):
-        encode_feature = torch.zeros(point_feature.shape[0], self.cond_length, self.config.word_embed_proj_dim,
-                                    device=self.cond_head_proj.weight.device, dtype=self.cond_head_proj.weight.dtype)
+        encode_feature = torch.zeros(
+            point_feature.shape[0],
+            self.cond_length,
+            self.config.word_embed_proj_dim,
+            device=self.cond_head_proj.weight.device,
+            dtype=self.cond_head_proj.weight.dtype,
+        )
         encode_feature[:, 0] = self.cond_head_proj(point_feature[:, 0])
         shape_latents = self.point_encoder.to_shape_latents(point_feature[:, 1:])
-        encode_feature[:, 1:] = self.cond_proj(torch.cat([point_feature[:, 1:], shape_latents], dim=-1))
+        encode_feature[:, 1:] = self.cond_proj(
+            torch.cat([point_feature[:, 1:], shape_latents], dim=-1)
+        )
 
         return encode_feature
 
@@ -120,7 +148,10 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
         processed_point_feature = self.process_point_feature(point_feature)
         generate_length = self.max_length - self.cond_length
         net_device = next(self.parameters()).device
-        outputs = torch.ones(batch_size, generate_length).long().to(net_device) * self.eos_token_id
+        outputs = (
+            torch.ones(batch_size, generate_length).long().to(net_device)
+            * self.eos_token_id
+        )
         # batch x ntokens
         if not sampling:
             results = self.transformer.generate(
@@ -133,19 +164,21 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
             )
         else:
             results = self.transformer.generate(
-                inputs_embeds = processed_point_feature,
-                max_new_tokens = generate_length, # all faces plus two
+                inputs_embeds=processed_point_feature,
+                max_new_tokens=generate_length,  # all faces plus two
                 do_sample=True,
                 top_k=50,
                 top_p=0.95,
-                bos_token_id = self.bos_token_id,
-                eos_token_id = self.eos_token_id,
-                pad_token_id = self.pad_token_id,
+                bos_token_id=self.bos_token_id,
+                eos_token_id=self.eos_token_id,
+                pad_token_id=self.pad_token_id,
             )
-        assert results.shape[1] <= generate_length # B x ID  bos is not included since it's predicted
-        outputs[:, :results.shape[1]] = results
+        assert (
+            results.shape[1] <= generate_length
+        )  # B x ID  bos is not included since it's predicted
+        outputs[:, : results.shape[1]] = results
         # batch x ntokens ====> batch x ntokens x D
-        outputs = outputs[:, 1: -1]
+        outputs = outputs[:, 1:-1]
 
         outputs[outputs == self.bos_token_id] = self.pad_id
         outputs[outputs == self.eos_token_id] = self.pad_id
@@ -156,14 +189,10 @@ class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
 
         return gen_mesh
 
-def undiscretize(
-    t,
-    low,#-0.5
-    high,# 0.5
-    num_discrete
-):
-    t = t.float() #[0, num_discrete-1]
+
+def undiscretize(t, low, high, num_discrete):  # -0.5  # 0.5
+    t = t.float()  # [0, num_discrete-1]
 
     t /= num_discrete  # 0<=t<1
-    t = t * (high - low) + low # -0.5 <= t < 0.5
+    t = t * (high - low) + low  # -0.5 <= t < 0.5
     return t

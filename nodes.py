@@ -79,7 +79,7 @@ class MeshImage:
         )
 
         print("Setup model")
-        model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
+        model = MeshAnythingV2.from_pretrained("Yiwen-ntu/MeshAnythingV2")
 
         print("Setup dataset")
         set_seed(self.SEED)
