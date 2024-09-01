@@ -1,14 +1,7 @@
 import importlib
 
 nodes_module = importlib.import_module(".nodes", package=__name__)
-SaveMesh = getattr(nodes_module, "SaveMesh")
-GrayScale = getattr(nodes_module, "GrayScale")
-
-NODE_CLASS_MAPPINGS = {
-    # "CMA_MeshImage": MeshImage,
-    "CMA_SaveMesh": SaveMesh,
-    "CMA_GrayScale": GrayScale,
-}
+NODE_CLASS_MAPPINGS = getattr(nodes_module, "NODE_CLASS_MAPPINGS")
 
 print('--------------')
 print('*ComfyUI_MeshAnythingV2- nodes_loaded*')
