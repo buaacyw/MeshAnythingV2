@@ -10,14 +10,21 @@ from accelerate import Accelerator
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
 
-# from MeshAnything.models.meshanything_v2 import MeshAnythingV2
-from .cma_utils import pils_to_torch_imgs, torch_imgs_to_pils, parse_save_filename
+from MeshAnything.models.meshanything_v2 import MeshAnythingV2
+from .cma_utils import (
+    Dataset,
+    pils_to_torch_imgs,
+    torch_imgs_to_pils,
+    parse_save_filename,
+)
 from .mesh import Mesh
 
 DEVICE_STR = "cuda" if torch.cuda.is_available() else "cpu"
 DEVICE = torch.device(DEVICE_STR)
 
-ROOT_PATH = os.path.join(folder_paths.get_folder_paths("custom_nodes")[0], "ComfyUI-3D-Pack")
+ROOT_PATH = os.path.join(
+    folder_paths.get_folder_paths("custom_nodes")[0], "ComfyUI-3D-Pack"
+)
 CONFIG_ROOT_PATH = os.path.join(ROOT_PATH, "Configs")
 
 SUPPORTED_3D_EXTENSIONS = (
@@ -26,12 +33,34 @@ SUPPORTED_3D_EXTENSIONS = (
     ".glb",
 )
 
+
 class MeshImage:
+    SEED = 0
+    MC = False
+    MC_LEVEL = 7
+    BATCHSIZE_PER_GPU = 1
+    SAMPLING = False
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "mesh": ("MESH",),
+                "input_path": ("STRING",),
+                "input_type": (
+                    [
+                        "pc_normal",
+                        "mesh",
+                    ],
+                    {"default": "pc_normal"},
+                ),
+                "out_dir": (
+                    "STRING",
+                    {
+                        "default": os.path.join(
+                            folder_paths.output_directory, "meshanythingv2"
+                        )
+                    },
+                ),
             }
         }
 
@@ -41,16 +70,73 @@ class MeshImage:
 
     CATEGORY = "CMA_V2"
 
-    def mesh_image(self, mesh):
-        print(mesh)
-        checkpoint_dir = os.path.join(folder_paths.output_directory, "meshanythingv2")
-        os.makedirs(checkpoint_dir, exist_ok=True)
+    def mesh_image(self, input_path, input_type, out_dir):
+        os.makedirs(out_dir, exist_ok=True)
         kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
         accelerator = Accelerator(
-            mixed_precision="fp16", project_dir=checkpoint_dir, kwargs_handlers=[kwargs]
+            mixed_precision="fp16", project_dir=out_dir, kwargs_handlers=[kwargs]
         )
 
-        # model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
+        model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
+
+        set_seed(self.SEED)
+        dataset = Dataset(input_type, [input_path], self.MC, self.MC_LEVEL)
+        dataloader = torch.utils.data.DataLoader(
+            dataset,
+            batch_size=self.BATCHSIZE_PER_GPU,
+            drop_last=False,
+            shuffle=False,
+        )
+
+        if accelerator.state.num_processes > 1:
+            model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
+        dataloader, model = accelerator.prepare(dataloader, model)
+        begin_time = time.time()
+        print("Generation Start!!!")
+        mesh = None
+        with accelerator.autocast():
+            for curr_iter, batch_data_label in enumerate(dataloader):
+                curr_time = time.time()
+                outputs = model(batch_data_label["pc_normal"], sampling=self.SAMPLING)
+                batch_size = outputs.shape[0]
+                device = outputs.device
+
+                for batch_id in range(batch_size):
+                    recon_mesh = outputs[batch_id]
+                    valid_mask = torch.all(
+                        ~torch.isnan(recon_mesh.reshape((-1, 9))), dim=1
+                    )
+                    recon_mesh = recon_mesh[valid_mask]  # nvalid_face x 3 x 3
+
+                    vertices = recon_mesh.reshape(-1, 3).cpu()
+                    vertices_index = np.arange(len(vertices))  # 0, 1, ..., 3 x face
+                    triangles = vertices_index.reshape(-1, 3)
+
+                    scene_mesh = trimesh.Trimesh(
+                        vertices=vertices,
+                        faces=triangles,
+                        force="mesh",
+                        merge_primitives=True,
+                    )
+                    scene_mesh.merge_vertices()
+                    scene_mesh.update_faces(scene_mesh.nondegenerate_faces())
+                    scene_mesh.update_faces(scene_mesh.unique_faces())
+                    scene_mesh.remove_unreferenced_vertices()
+                    scene_mesh.fix_normals()
+                    save_path = os.path.join(
+                        out_dir, f'{batch_data_label["uid"][batch_id]}_gen.obj'
+                    )
+                    num_faces = len(scene_mesh.faces)
+                    brown_color = np.array([255, 165, 0, 255], dtype=np.uint8)
+                    face_colors = np.tile(brown_color, (num_faces, 1))
+
+                    scene_mesh.visual.face_colors = face_colors
+                    scene_mesh.export(save_path)
+                    mesh = scene_mesh
+                    print(f"{save_path} Over!!")
+        end_time = time.time()
+        print(f"Total time: {end_time - begin_time}")
+        return (mesh,)
 
 
 class GrayScale:
@@ -205,6 +291,7 @@ class PreviewMesh:
         ]
         return {"ui": {"previews": previews}, "result": ()}
 
+
 class SaveImageToNpyNode:
     @classmethod
     def INPUT_TYPES(s):
@@ -217,6 +304,7 @@ class SaveImageToNpyNode:
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("npy_file_path",)
     FUNCTION = "image_to_npy"
+    OUTPUT_NODE = True
 
     CATEGORY = "CMA_V2"
 
@@ -227,6 +315,7 @@ class SaveImageToNpyNode:
         file_path = os.path.join(folder_paths.output_directory, file_name)
         np.save(file_path, img_array)
         return (file_path,)
+
 
 NODE_CLASS_MAPPINGS = {
     "CMA_MeshImage": MeshImage,
