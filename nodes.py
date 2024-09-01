@@ -9,19 +9,43 @@ import numpy as np
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
-from MeshAnything.models.meshanything_v2 import MeshAnythingV2
+# from MeshAnything.models.meshanything_v2 import MeshAnythingV2
 from utils import Dataset, pils_to_torch_imgs, torch_imgs_to_pils, parse_save_filename
 from mesh import Mesh
-
-"""
-The ComfyUI Meshanythingv2 Node simply takes an input image/text/3d Object and turns into a mesh, even smaller size.
-"""
 
 SUPPORTED_3D_EXTENSIONS = (
     ".obj",
     ".ply",
     ".glb",
 )
+
+class MeshImage:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "mesh": ("MESH",),
+            }
+        }
+
+    RETURN_TYPES = ("MESH",)
+    FUNCTION = "load_mesh"
+    OUTPUT_NODE = True
+
+    CATEGORY = "CMA_V2"
+
+    def mesh_image(self, mesh):
+        print(mesh)
+        checkpoint_dir = os.path.join(folder_paths.output_directory, "meshanythingv2")
+        os.makedirs(checkpoint_dir, exist_ok=True)
+        kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
+        accelerator = Accelerator(
+            mixed_precision="fp16",
+            project_dir=checkpoint_dir,
+            kwargs_handlers=[kwargs]
+        )
+
+        # model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
 
 
 class GrayScale:
@@ -78,35 +102,6 @@ class SaveMesh:
             mesh.write(save_path)
 
         return (save_path,)
-
-
-class MeshImage:
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "mesh": ("MESH",),
-            }
-        }
-
-    RETURN_TYPES = ("MESH",)
-    FUNCTION = "load_mesh"
-    OUTPUT_NODE = True
-
-    CATEGORY = "CMA_V2"
-
-    def mesh_image(self, mesh):
-        print(mesh)
-        checkpoint_dir = os.path.join(folder_paths.output_directory, "meshanythingv2")
-        os.makedirs(checkpoint_dir, exist_ok=True)
-        kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
-        accelerator = Accelerator(
-            mixed_precision="fp16",
-            project_dir=checkpoint_dir,
-            kwargs_handlers=[kwargs]
-        )
-
-        model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
 
 
 class LoadMesh:
@@ -167,7 +162,7 @@ class LoadInputType:
 class ImageTo3DMeshNode:
     @classmethod
     def INPUT_TYPES(cls):
-        return {"required": {"image": ("IMAGE",)}}
+        return {"required": {"images": ("IMAGE",)}}
 
     RETURN_TYPES = ("MESH",)
     RETURN_NAMES = ("mesh",)
@@ -178,12 +173,37 @@ class ImageTo3DMeshNode:
     OUTPUT_NODE = True
 
     @classmethod
-    def convert_image_to_mesh(cls, image):
+    def convert_image_to_mesh(cls, images):
         mesh = None
-        image = image.cpu().numpy() if isinstance(image, torch.Tensor) else image
-        mesh = Mesh()
-        mesh.v = torch.tensor(np.random.rand(100, 3), dtype=torch.float32)
-        mesh.f = torch.tensor(np.random.randint(0, 100, (100, 3)), dtype=torch.int32)
+        image = torch_imgs_to_pils(images)[0]
+        width, height = image.size
+        pixels = np.array(image)
+
+        # Create a mesh from the heightmap
+        vertices = []
+        faces = []
+
+        # Generate vertices
+        for i in range(height):
+            for j in range(width):
+                # Normalize pixel values to a range (e.g., 0 to 1) and scale as needed
+                z = pixels[i, j] / 255.0  # Normalize to 0-1 range
+                vertices.append([j, i, z])
+
+        # Generate faces
+        for i in range(height - 1):
+            for j in range(width - 1):
+                # Create two triangular faces for each square
+                faces.append([i * width + j, (i + 1) * width + j, (i + 1) * width + j + 1])
+                faces.append([i * width + j, (i + 1) * width + j + 1, i * width + j + 1])
+
+        # Convert to numpy arrays
+        vertices = np.array(vertices)
+        faces = np.array(faces)
+
+        # Create the mesh
+        mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
+        # mesh = Mesh.load_trimesh()
         return (mesh,)
 
 
