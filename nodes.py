@@ -174,37 +174,41 @@ class ImageTo3DMeshNode:
 
     @classmethod
     def convert_image_to_mesh(cls, images):
-        mesh = None
-        image = torch_imgs_to_pils(images)[0]
-        width, height = image.size
-        pixels = np.array(image)
+        try:
+            mesh = None
+            image = torch_imgs_to_pils(images)[0]
+            width, height = image.size
+            pixels = np.array(image)
 
-        # Create a mesh from the heightmap
-        vertices = []
-        faces = []
+            # Create a mesh from the heightmap
+            vertices = []
+            faces = []
 
-        # Generate vertices
-        for i in range(height):
-            for j in range(width):
-                # Normalize pixel values to a range (e.g., 0 to 1) and scale as needed
-                z = pixels[i, j] / 255.0  # Normalize to 0-1 range
-                vertices.append([j, i, z])
+            # Generate vertices
+            for i in range(height):
+                for j in range(width):
+                    # Normalize pixel values to a range (e.g., 0 to 1) and scale as needed
+                    z = pixels[i, j] / 255.0  # Normalize to 0-1 range
+                    vertices.append([j, i, z])
 
-        # Generate faces
-        for i in range(height - 1):
-            for j in range(width - 1):
-                # Create two triangular faces for each square
-                faces.append([i * width + j, (i + 1) * width + j, (i + 1) * width + j + 1])
-                faces.append([i * width + j, (i + 1) * width + j + 1, i * width + j + 1])
+            # Generate faces
+            for i in range(height - 1):
+                for j in range(width - 1):
+                    # Create two triangular faces for each square
+                    faces.append([i * width + j, (i + 1) * width + j, (i + 1) * width + j + 1])
+                    faces.append([i * width + j, (i + 1) * width + j + 1, i * width + j + 1])
 
-        # Convert to numpy arrays
-        vertices = np.array(vertices)
-        faces = np.array(faces)
+            # Convert to numpy arrays
+            vertices = np.array(vertices)
+            faces = np.array(faces)
 
-        # Create the mesh
-        mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
-        # mesh = Mesh.load_trimesh()
-        return (mesh,)
+            # Create the mesh
+            mesh = trimesh.Trimesh(vertices=vertices, faces=faces)
+            mesh = Mesh.load_trimesh(mesh)
+            return (mesh,)
+        except Exception as e:
+            print(e)
+            raise ValueError("Invalid image")
 
 
 NODE_CLASS_MAPPINGS = {
