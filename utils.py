@@ -10,7 +10,7 @@ from os.path import isfile, join, exists, dirname
 import torch.nn.functional as F
 import torchvision.transforms.functional as TF
 import torch.nn.functional as F
-import datetime
+from datetime import datetime
 import mesh2sdf.core
 import numpy as np
 import skimage.measure
