@@ -254,43 +254,11 @@ class ImageTo3DMeshNode:
 
     @classmethod
     def convert_image_to_mesh(cls, image):
-        if isinstance(image, torch.Tensor):
-            # Convert the tensor to a NumPy array
-            image = image.cpu().numpy()
-        # Convert the image to grayscale
-        print(type(image), image)
-        image = Image.fromarray(image).convert("L")
-        image_array = np.array(image)
-
-        # Simple example: Create a heightmap-based mesh
-        heightmap = image_array / 255.0  # Normalize to [0, 1] range
-        heightmap = heightmap * 10.0  # Scale height values
-
-        # Create vertices and faces for the mesh
-        vertices = []
-        faces = []
-        for i in range(heightmap.shape):
-            for j in range(heightmap.shape):
-                vertices.append([i, j, heightmap[i, j]])
-                if i < heightmap.shape - 1 and j < heightmap.shape - 1:
-                    faces.append(
-                        [
-                            i * heightmap.shape + j,
-                            (i + 1) * heightmap.shape + j,
-                            (i + 1) * heightmap.shape + j + 1,
-                        ]
-                    )
-                    faces.append(
-                        [
-                            i * heightmap.shape + j,
-                            (i + 1) * heightmap.shape + j + 1,
-                            i * heightmap.shape + j + 1,
-                        ]
-                    )
-
-        print("DONE!!!!")
-        # Create the mesh
-        mesh = trimesh.Trimesh(vertices=vertices, faces=faces, process=False)
+        mesh = None
+        image = image.cpu().numpy() if isinstance(image, torch.Tensor) else image
+        mesh = Mesh()
+        mesh.v = torch.tensor(np.random.rand(100, 3), dtype=torch.float32)
+        mesh.f = torch.tensor(np.random.randint(0, 100, (100, 3)), dtype=torch.int32)
         return (mesh,)
 
 
