@@ -119,7 +119,7 @@ class MeshImage:
         accelerator = Accelerator(
             mixed_precision="fp16", project_dir=checkpoint_dir, kwargs_handlers=[kwargs]
         )
-        model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
+        # model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
         # set_seed(0)
         # dataset = Dataset("pc_normal", [MeshImage._resolve_path(image=image)], False, 7)
 
@@ -214,7 +214,7 @@ class LoadMesh:
     RETURN_TYPES = ("MESH",)
     RETURN_NAMES = ("mesh",)
     FUNCTION = "load_mesh"
-    CATEGORY = "Comfy3D/Import|Export"
+    CATEGORY = "CMA_V2"
 
     def load_mesh(self, mesh_file_path, resize, renormal, retex, optimizable):
         mesh = None
