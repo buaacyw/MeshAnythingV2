@@ -128,6 +128,7 @@ class LoadMesh:
                 print(f"[LoadMesh] File name {filename} does not end with supported 3D file extensions: {SUPPORTED_3D_EXTENSIONS}")
         else:        
             print(f"[LoadMesh] File {mesh_path} does not exist")
+            raise ValueError("Invalid file path")
         return (mesh, )
 
 
@@ -210,6 +211,37 @@ class ImageTo3DMeshNode:
             print(e)
             raise ValueError("Invalid image")
 
+class PreviewMesh:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "mesh_file_path": ("STRING", {"default": '', "multiline": False}),
+            },
+        }
+    
+    OUTPUT_NODE = True
+    RETURN_TYPES = ()
+    FUNCTION = "preview_mesh"
+    CATEGORY = "CMA_V2"
+
+    def preview_mesh(self, mesh_file_path):
+        
+        mesh_folder_path, filename = os.path.split(mesh_file_path)
+        
+        if not os.path.isabs(mesh_file_path):
+            mesh_file_path = os.path.join(folder_paths.output_directory, mesh_folder_path)
+        
+        if not filename.lower().endswith(SUPPORTED_3D_EXTENSIONS):
+            print(f"[MeshImage] File name {filename} does not end with supported 3D file extensions: {SUPPORTED_3D_EXTENSIONS}")
+            mesh_file_path = ""
+        
+        previews = [
+            {
+                "filepath": mesh_file_path,
+            }
+        ]
+        return {"ui": {"previews": previews}, "result": ()}
 
 NODE_CLASS_MAPPINGS = {
     "CMA_MeshImage": MeshImage,
@@ -218,4 +250,5 @@ NODE_CLASS_MAPPINGS = {
     "CMA_LoadMesh": LoadMesh,
     "CMA_LoadInputTYpe": LoadInputType,
     "CMA_ImageToMesh": ImageTo3DMeshNode,
+    "CMA_PreviewMesh": PreviewMesh
 }
