@@ -8,11 +8,14 @@ from einops import rearrange
 from huggingface_hub import PyTorchModelHubMixin
 
 
-class MeshAnythingV2(nn.Module, PyTorchModelHubMixin):
+class MeshAnythingV2(
+    nn.Module,
+    PyTorchModelHubMixin,
+    repo_url="https://github.com/buaacyw/MeshAnythingV2",
+    pipeline_tag="image-to-3d",
+    license="mit",
+):
     # custom
-    repo_url = "https://github.com/buaacyw/MeshAnythingV2"
-    pipeline_tag = "image-to-3d"
-    license = "mit"
 
     def __init__(self, config={}):
         super().__init__()
