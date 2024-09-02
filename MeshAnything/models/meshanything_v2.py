@@ -1,8 +1,8 @@
 import torch
 from torch import nn
 from transformers import AutoModelForCausalLM
-from MeshAnything.miche.encode import load_model
-from MeshAnything.models.shape_opt import ShapeOPTConfig
+from ...MeshAnything.miche.encode import load_model
+from ...MeshAnything.models.shape_opt import ShapeOPTConfig
 from einops import rearrange
 
 from huggingface_hub import PyTorchModelHubMixin
