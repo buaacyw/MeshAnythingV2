@@ -80,12 +80,7 @@ class MeshImage:
         )
 
         print("Setup model")
-        model = MeshAnythingV2.from_pretrained(
-            "Yiwen-ntu/MeshAnythingV2",
-            repo_url="https://github.com/buaacyw/MeshAnythingV2",
-            pipeline_tag="image-to-3d",
-            license="mit",
-        )
+        model = MeshAnythingV2.from_pretrained("Yiwen-ntu/MeshAnythingV2")
 
         print("Setup dataset")
         set_seed(self.SEED)
