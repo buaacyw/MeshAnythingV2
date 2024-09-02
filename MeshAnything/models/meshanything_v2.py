@@ -3,18 +3,15 @@ from torch import nn
 from transformers import AutoModelForCausalLM
 import sys, os
 import folder_paths
-import importlib
+# import importlib
 
 from einops import rearrange
 from huggingface_hub import PyTorchModelHubMixin
 
-module = importlib.import_module(f"MeshAnything.miche.encode", package="comfyui_meshanything_v2")
-load_model = getattr(module, "load_model")
-module2 = importlib.import_module(f"MeshAnything.models.shape_opt", package="comfyui_meshanything_v2")
-ShapeOPTConfig = getattr(module, "ShapeOPTConfig")
-
 # from MeshAnything.miche.encode import load_model
 # from MeshAnything.models.shape_opt import ShapeOPTConfig
+from ..miche.encode import load_model
+from ..models.shape_opt import ShapeOPTConfig
 
 
 class MeshAnythingV2(
