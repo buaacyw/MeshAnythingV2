@@ -79,7 +79,8 @@ class MeshImage:
         )
 
         print("Setup model")
-        model = MeshAnythingV2.from_pretrained("Yiwen-ntu/MeshAnythingV2")
+        # model = MeshAnythingV2.from_pretrained("Yiwen-ntu/MeshAnythingV2")
+        model = MeshAnythingV2.from_pretrained(os.path.join("/kaggle/ComfyUI/models/checkpoints", "model.safetensors"), local_files_only=True)
 
         print("Setup dataset")
         set_seed(self.SEED)
