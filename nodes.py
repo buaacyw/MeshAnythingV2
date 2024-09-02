@@ -9,7 +9,8 @@ import numpy as np
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
-
+from safetensors.torch import load_model
+from huggingface_hub import hf_hub_download
 from MeshAnything.models.meshanything_v2 import MeshAnythingV2
 from .cma_utils import (
     Dataset,
@@ -79,8 +80,7 @@ class MeshImage:
         )
 
         print("Setup model")
-        # model = MeshAnythingV2.from_pretrained("Yiwen-ntu/MeshAnythingV2")
-        model = MeshAnythingV2.from_pretrained(os.path.join("/kaggle/ComfyUI/models/checkpoints", "model.safetensors"), local_files_only=True)
+        model = MeshAnythingV2.from_pretrained("Yiwen-ntu/MeshAnythingV2")
 
         print("Setup dataset")
         set_seed(self.SEED)
