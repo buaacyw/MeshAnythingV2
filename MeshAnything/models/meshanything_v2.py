@@ -1,8 +1,17 @@
 import torch
 from torch import nn
 from transformers import AutoModelForCausalLM
-from ...MeshAnything.miche.encode import load_model
-from ...MeshAnything.models.shape_opt import ShapeOPTConfig
+import sys, os
+import folder_paths
+
+ROOT_PATH = os.path.join(folder_paths.get_folder_paths("custom_nodes")[0], "comfyui_meshanything_v2")
+MODULE_PATH = os.path.join(ROOT_PATH, "MeshAnything")
+
+sys.path.append(ROOT_PATH)
+sys.path.append(MODULE_PATH)
+
+from MeshAnything.miche.encode import load_model
+from MeshAnything.models.shape_opt import ShapeOPTConfig
 from einops import rearrange
 
 from huggingface_hub import PyTorchModelHubMixin
