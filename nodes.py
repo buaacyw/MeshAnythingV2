@@ -79,6 +79,8 @@ class MeshImage:
             mixed_precision="fp16", project_dir=out_dir, kwargs_handlers=[kwargs]
         )
 
+        print(os.path.dirname(__file__))
+
         print("Setup model")
         model = MeshAnythingV2.from_pretrained("Yiwen-ntu/MeshAnythingV2")
 
