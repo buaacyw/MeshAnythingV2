@@ -4,7 +4,7 @@ import sys
 import folder_paths
 import importlib
 
-ROOT_PATH = os.path.join(folder_paths.get_folder_paths("custom_nodes")[0], "comfyui_meshanything_v2")
+ROOT_PATH = os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2")
 MODULE_PATH = os.path.join(ROOT_PATH, "MeshAnything")
 
 sys.path.append(ROOT_PATH)

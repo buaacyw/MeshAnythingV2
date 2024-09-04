@@ -12,7 +12,7 @@ from huggingface_hub import PyTorchModelHubMixin
 # from MeshAnything.miche.encode import load_model
 # from MeshAnything.models.shape_opt import ShapeOPTConfig
 
-print(folder_paths.get_folder_paths("custom_nodes")[0])
+print(os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2"))
 # from MeshAnything.miche.encode import load_model
 # from MeshAnything.models.shape_opt import ShapeOPTConfig
 
@@ -29,8 +29,8 @@ print(folder_paths.get_folder_paths("custom_nodes")[0])
 # print(dir(shapeopt_module))
 # ShapeOPTConfig = getattr(shapeopt_module, "ShapeOPTConfig")
 
-from ...MeshAnything.miche.encode import load_model
-from ...MeshAnything.models.shape_opt import ShapeOPTConfig
+from MeshAnything.miche.encode import load_model
+from MeshAnything.models.shape_opt import ShapeOPTConfig
 
 class MeshAnythingV2(
     nn.Module,
