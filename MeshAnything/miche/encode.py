@@ -4,6 +4,8 @@ from omegaconf import OmegaConf
 import numpy as np
 import torch
 from .michelangelo.utils.misc import instantiate_from_config
+import folder_paths
+import os
 
 def load_surface(fp):
     
@@ -39,8 +41,9 @@ def reconstruction(args, model, bounds=(-1.25, -1.25, -1.25, 1.25, 1.25, 1.25), 
     
     return 0
 
-def load_model(ckpt_path="MeshAnything/miche/shapevae-256.ckpt"):
-    model_config = OmegaConf.load("MeshAnything/miche/shapevae-256.yaml")
+# def load_model(ckpt_path="MeshAnything/miche/shapevae-256.ckpt"):
+def load_model(ckpt_path=os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2", "MeshAnything/miche/shapevae-256.ckpt")):
+    model_config = OmegaConf.load(os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2", "MeshAnything/miche/shapevae-256.yaml"))
     # print(model_config)
     if hasattr(model_config, "model"):
         model_config = model_config.model
