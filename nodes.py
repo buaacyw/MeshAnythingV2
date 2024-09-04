@@ -23,11 +23,6 @@ from .mesh import Mesh
 DEVICE_STR = "cuda" if torch.cuda.is_available() else "cpu"
 DEVICE = torch.device(DEVICE_STR)
 
-ROOT_PATH = os.path.join(
-    folder_paths.get_folder_paths("custom_nodes")[0], "ComfyUI-3D-Pack"
-)
-CONFIG_ROOT_PATH = os.path.join(ROOT_PATH, "Configs")
-
 SUPPORTED_3D_EXTENSIONS = (
     ".obj",
     ".ply",
