@@ -10,10 +10,10 @@ from huggingface_hub import PyTorchModelHubMixin
 # from MeshAnything.miche.encode import load_model
 # from MeshAnything.models.shape_opt import ShapeOPTConfig
 
-MeshAnythingModule = importlib.import_module("MeshAnything.miche.encode", "comfyui_meshanything_v2")
+MeshAnythingModule = importlib.import_module(".MeshAnything.miche.encode", "comfyui_meshanything_v2")
 load_model = getattr(MeshAnythingModule, "load_model")
 
-MeshAnythingModule = importlib.import_module("MeshAnything.models.shape_opt", "comfyui_meshanything_v2")
+MeshAnythingModule = importlib.import_module(".MeshAnything.models.shape_opt", "comfyui_meshanything_v2")
 ShapeOPTConfig = getattr(MeshAnythingModule, "ShapeOPTConfig")
 
 # from ..miche.encode import load_model
