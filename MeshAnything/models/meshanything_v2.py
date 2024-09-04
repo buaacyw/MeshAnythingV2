@@ -15,11 +15,13 @@ from huggingface_hub import PyTorchModelHubMixin
 ENCODE_PATH = os.path.join(folder_paths.get_folder_paths("custom_nodes")[0], "comfyui_meshanything_v2", "MeshAnything/miche/encode.py")
 encode_spec = importlib.util.spec_from_file_location("MeshAnything.miche.encode", ENCODE_PATH)
 encode_module = importlib.util.module_from_spec(encode_spec)
+print(dir(encode_module))
 load_model = getattr(encode_module, "load_model")
 
 SHAPEOPT_PATH = os.path.join(folder_paths.get_folder_paths("custom_nodes")[0], "comfyui_meshanything_v2", "MeshAnything/models.shape_opt.py")
 shapeopt_spec = importlib.util.spec_from_file_location("MeshAnything.models.shape_opt", SHAPEOPT_PATH)
 shapeopt_module = importlib.util.module_from_spec(shapeopt_spec)
+print(dir(shapeopt_module))
 ShapeOPTConfig = getattr(shapeopt_module, "ShapeOPTConfig")
 
 # from ..miche.encode import load_model
