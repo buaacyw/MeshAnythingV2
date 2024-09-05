@@ -16,8 +16,7 @@ def get_obj_from_str(string, reload=False):
     if reload:
         module_imp = importlib.import_module(module)
         importlib.reload(module_imp)
-
-    print("type", type(module))
+    module = "." + str(module)
     spec = importlib.util.find_spec(
         module, ["/home/qblocks/ComfyUI/custom_nodes/comfyui-meshanything-v2"]
     )
