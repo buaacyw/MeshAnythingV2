@@ -6,7 +6,6 @@ import torch
 import torch.distributed as dist
 
 
-
 def get_obj_from_str(string, reload=False):
     module, cls = string.rsplit(".", 1)
     print("***********************************")
@@ -16,7 +15,13 @@ def get_obj_from_str(string, reload=False):
     if reload:
         module_imp = importlib.import_module(module)
         importlib.reload(module_imp)
-    return getattr(importlib.import_module(module, package="MeshAnything"), cls)
+    spec = importlib.machinery.PathFinder().find_spec(
+        module, ["/home/qblocks/ComfyUI/custom_nodes/comfyui_meshanything_v2"]
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return getattr(module, cls)
+    # return getattr(importlib.import_module(module, package=None), cls)
 
 
 def get_obj_from_config(config):
@@ -74,11 +79,7 @@ def all_gather_batch(tensors):
     output_tensor = []
     for tensor in tensors:
         tensor_all = [torch.ones_like(tensor) for _ in range(world_size)]
-        dist.all_gather(
-            tensor_all,
-            tensor,
-            async_op=False  # performance opt
-        )
+        dist.all_gather(tensor_all, tensor, async_op=False)  # performance opt
 
         tensor_list.append(tensor_all)
 
