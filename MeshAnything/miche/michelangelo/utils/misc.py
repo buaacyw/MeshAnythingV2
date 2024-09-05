@@ -25,7 +25,6 @@ def get_obj_from_str(string, reload=False):
         "custom_nodes",
         "comfyui-meshanything-v2",
         "MeshAnything",
-        "__init__.py",
     )
 
     spec = importlib.util.spec_from_file_location("MeshAnything", ROOT_PATH)
