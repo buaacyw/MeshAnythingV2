@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import importlib
+import importlib, sys
 
 import torch
 import torch.distributed as dist
@@ -12,6 +12,7 @@ def get_obj_from_str(string, reload=False):
     print("***********************************")
     print(module, cls)
     print("***********************************")
+    print(sys.path)
     if reload:
         module_imp = importlib.import_module(module)
         importlib.reload(module_imp)
