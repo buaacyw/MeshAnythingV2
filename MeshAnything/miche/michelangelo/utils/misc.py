@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import importlib.util
 import importlib, sys
 
 import torch
@@ -15,7 +16,7 @@ def get_obj_from_str(string, reload=False):
     if reload:
         module_imp = importlib.import_module(module)
         importlib.reload(module_imp)
-    spec = importlib.machinery.PathFinder().find_spec(
+    spec = importlib.util.find_spec(
         module, ["/home/qblocks/ComfyUI/custom_nodes/comfyui_meshanything_v2"]
     )
     module = importlib.util.module_from_spec(spec)
