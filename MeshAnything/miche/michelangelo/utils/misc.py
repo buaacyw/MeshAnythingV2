@@ -9,6 +9,9 @@ import torch.distributed as dist
 
 def get_obj_from_str(string, reload=False):
     module, cls = string.rsplit(".", 1)
+    print("***********************************")
+    print(module, cls)
+    print("***********************************")
     if reload:
         module_imp = importlib.import_module(module)
         importlib.reload(module_imp)
