@@ -6,6 +6,12 @@ import importlib, sys
 import torch
 import torch.distributed as dist
 
+import os
+import folder_paths
+
+
+def list_all_packages():
+    return sorted(importlib.metadata.distributions(), key=lambda x: x.metadata['Name'])
 
 def get_obj_from_str(string, reload=False):
     module, cls = string.rsplit(".", 1)
@@ -13,13 +19,17 @@ def get_obj_from_str(string, reload=False):
     print(module, cls)
     print("***********************************")
     print(sys.path)
+
+    ROOT_PATH = os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2", "MeshAnything")
+    sys.path.append(ROOT_PATH)
+
+    for package in list_all_packages():
+        print(f"{package.metadata['Name']} {package.version}")
+
     if reload:
         module_imp = importlib.import_module(module)
         importlib.reload(module_imp)
-    spec = importlib.util.find_spec(
-        module, ["/home/qblocks/ComfyUI/custom_nodes/comfyui-meshanything-v2"]
-    )
-    return getattr(importlib.import_module(module, package="comfyui-meshanything-v2"), cls)
+    return getattr(importlib.import_module(module, package=None), cls)
 
 
 def get_obj_from_config(config):
