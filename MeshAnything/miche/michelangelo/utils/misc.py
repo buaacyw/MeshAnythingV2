@@ -19,9 +19,10 @@ def get_obj_from_str(string, reload=False):
     print(module, cls)
     print("***********************************")
 
-    ROOT_PATH = os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2", "MeshAnything")
+    ROOT_PATH = os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2", "MeshAnything", "__init__.py")
 
     spec = importlib.util.spec_from_file_location("MeshAnything", ROOT_PATH)
+    print("Spec", spec)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
