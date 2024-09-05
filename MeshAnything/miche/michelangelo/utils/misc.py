@@ -16,7 +16,7 @@ def list_all_packages():
 def get_obj_from_str(string, reload=False):
     module_name, cls = string.rsplit(".", 1)
     print("***********************************")
-    print(module, cls)
+    print(module_name, cls)
     print("***********************************")
 
     ROOT_PATH = os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2", "MeshAnything", "__init__.py")
