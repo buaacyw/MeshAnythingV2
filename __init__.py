@@ -5,10 +5,10 @@ import folder_paths
 import importlib
 
 ROOT_PATH = os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2")
-MODULE_PATH = os.path.join(ROOT_PATH, "MeshAnything")
+# MODULE_PATH = os.path.join(ROOT_PATH, "MeshAnything")
 
 sys.path.append(ROOT_PATH)
-sys.path.append(MODULE_PATH)
+# sys.path.append(MODULE_PATH)
 
 from .nodes import NODE_CLASS_MAPPINGS
 
