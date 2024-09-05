@@ -14,12 +14,12 @@ def list_all_packages():
     return sorted(importlib.metadata.distributions(), key=lambda x: x.metadata['Name'])
 
 def get_obj_from_str(string, reload=False):
-    module, cls = string.rsplit(".", 1)
+    module_name, cls = string.rsplit(".", 1)
     print("***********************************")
     print(module, cls)
     print("***********************************")
 
-    ROOT_PATH = os.path.join(folder_paths.base_path, "custom_nodes", "comfyui-meshanything-v2", "MeshAnything", "__init__.py")
+    ROOT_PATH = os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2", "MeshAnything", "__init__.py")
 
     spec = importlib.util.spec_from_file_location("MeshAnything", ROOT_PATH)
     print("Spec", spec)
@@ -27,10 +27,10 @@ def get_obj_from_str(string, reload=False):
     spec.loader.exec_module(module)
 
     if reload:
-        module_imp = importlib.import_module(module)
+        module_imp = importlib.import_module(module_name)
         importlib.reload(module_imp)
 
-    return getattr(importlib.import_module("." + module, package="MeshAnything"), cls)
+    return getattr(importlib.import_module("." + module_name, package="MeshAnything"), cls)
 
 
 def get_obj_from_config(config):
