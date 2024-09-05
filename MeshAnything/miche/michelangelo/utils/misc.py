@@ -39,7 +39,7 @@ def get_obj_from_str(string, reload=False):
         importlib.reload(module_imp)
 
     return getattr(
-        importlib.import_module("." + module_name, package="MeshAnything"), cls
+        importlib.import_module(module_name, package=None), cls
     )
 
 
