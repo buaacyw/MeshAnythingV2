@@ -20,16 +20,36 @@ def get_obj_from_str(string, reload=False):
     print("***********************************")
     print(sys.path)
 
+    custom_module_path = '/home/qblocks/ComfyUI/custom_nodes/comfyui_meshanything_v2'
+
+    # List to hold custom modules
+    custom_modules = []
+
+    # Iterate through the sys.modules dictionary
+    for module_name, module in sys.modules.items():
+        # Check if the module has a __file__ attribute and if it is in the custom path
+        if hasattr(module, '__file__'):
+            module_file = os.path.abspath(module.__file__)
+            if module_file.startswith(custom_module_path):
+                custom_modules.append(module_name)
+
+    # Print the list of custom modules
+    print("Custom Modules:")
+    for module in sorted(custom_modules):
+        print(module)
+
     ROOT_PATH = os.path.join(folder_paths.base_path, "custom_nodes", "comfyui_meshanything_v2", "MeshAnything")
     sys.path.append(ROOT_PATH)
 
-    for package in list_all_packages():
-        print(f"{package.metadata['Name']} {package.version}")
+    spec = importlib.util.spec_from_file_location("MeshAnything", ROOT_PATH)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
 
     if reload:
         module_imp = importlib.import_module(module)
         importlib.reload(module_imp)
-    return getattr(importlib.import_module(module, package=None), cls)
+
+    return getattr(importlib.import_module("." + module, package="MeshAnything"), cls)
 
 
 def get_obj_from_config(config):
