@@ -13,11 +13,9 @@ sys.path.append(MODULE_PATH)
 from .nodes import NODE_CLASS_MAPPINGS
 from . import MeshAnything
 
-print(__name__, __file__)
-
 print('--------------')
 print('*ComfyUI_MeshAnythingV2- nodes_loaded*')
 print('--------------')
 
 # __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
-__ALL__ = ['NODE_CLASS_MAPPINGS', 'MeshAnything']
+__ALL__ = ['NODE_CLASS_MAPPINGS']
