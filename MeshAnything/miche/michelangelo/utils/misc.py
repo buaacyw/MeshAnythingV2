@@ -20,6 +20,10 @@ def get_obj_from_str(string, reload=False):
     print(module_name, cls)
     print("***********************************")
 
+    # if reload:
+    #     module_imp = importlib.import_module(module_name)
+    #     importlib.reload(module_imp)
+
     ROOT_PATH = os.path.join(
         folder_paths.base_path,
         "custom_nodes",
@@ -30,16 +34,16 @@ def get_obj_from_str(string, reload=False):
 
     spec = importlib.util.spec_from_file_location("MeshAnything", ROOT_PATH)
     print("Spec", spec)
+    if spec is None:
+        raise ImportError(
+            'Cannot get module spec from file location', file_path)
     module = importlib.util.module_from_spec(spec)
+    sys.modules["MeshAnything"] = module
     print(module)
     spec.loader.exec_module(module)
 
-    if reload:
-        module_imp = importlib.import_module(module_name)
-        importlib.reload(module_imp)
-
     return getattr(
-        importlib.import_module(module_name, package=None), cls
+        importlib.import_module(f'.{module_name}', "custom_nodes.comfyui-meshanything-v2"), cls
     )
 
 
