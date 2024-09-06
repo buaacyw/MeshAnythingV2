@@ -16,13 +16,6 @@ def list_all_packages():
 
 def get_obj_from_str(string, reload=False):
     module_name, cls = string.rsplit(".", 1)
-    print("***********************************")
-    print(module_name, cls)
-    print("***********************************")
-
-    # if reload:
-    #     module_imp = importlib.import_module(module_name)
-    #     importlib.reload(module_imp)
 
     ROOT_PATH = os.path.join(
         folder_paths.base_path,
@@ -33,17 +26,21 @@ def get_obj_from_str(string, reload=False):
     )
 
     spec = importlib.util.spec_from_file_location("MeshAnything", ROOT_PATH)
-    print("Spec", spec)
-    if spec is None:
-        raise ImportError(
-            'Cannot get module spec from file location', file_path)
     module = importlib.util.module_from_spec(spec)
     sys.modules["MeshAnything"] = module
-    print(module)
     spec.loader.exec_module(module)
 
+    if reload:
+        module_imp = importlib.import_module(
+            f".{module_name}", "custom_nodes.comfyui-meshanything-v2"
+        )
+        importlib.reload(module_imp)
+
     return getattr(
-        importlib.import_module(f'.{module_name}', "custom_nodes.comfyui-meshanything-v2"), cls
+        importlib.import_module(
+            f".{module_name}", "custom_nodes.comfyui-meshanything-v2"
+        ),
+        cls,
     )
 
 
