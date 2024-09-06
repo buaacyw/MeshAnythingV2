@@ -19,10 +19,10 @@ from diffusers.schedulers import (
     DPMSolverMultistepScheduler
 )
 
-from ......MeshAnything.miche.michelangelo.utils import instantiate_from_config
+from MeshAnything.miche.michelangelo.utils import instantiate_from_config
 # from MeshAnything.miche.michelangelo.models.tsal.tsal_base import ShapeAsLatentPLModule
-from ......MeshAnything.miche.michelangelo.models.tsal.tsal_base import AlignedShapeAsLatentPLModule
-from ......MeshAnything.miche.michelangelo.models.asl_diffusion.inference_utils import ddim_sample
+from MeshAnything.miche.michelangelo.models.tsal.tsal_base import AlignedShapeAsLatentPLModule
+from MeshAnything.miche.michelangelo.models.asl_diffusion.inference_utils import ddim_sample
 
 SchedulerType = Union[DDIMScheduler, KarrasVeScheduler, DPMSolverMultistepScheduler]
 
