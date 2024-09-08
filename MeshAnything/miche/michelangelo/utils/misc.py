@@ -20,7 +20,7 @@ def get_obj_from_str(string, reload=False):
     ROOT_PATH = os.path.join(
         folder_paths.base_path,
         "custom_nodes",
-        "comfyui-meshanything-v2",
+        "comfyui_meshanything_v2",
         "MeshAnything",
         "__init__.py",
     )
@@ -32,13 +32,13 @@ def get_obj_from_str(string, reload=False):
 
     if reload:
         module_imp = importlib.import_module(
-            f".{module_name}", "custom_nodes.comfyui-meshanything-v2"
+            f".{module_name}", "custom_nodes.comfyui_meshanything_v2"
         )
         importlib.reload(module_imp)
 
     return getattr(
         importlib.import_module(
-            f".{module_name}", "custom_nodes.comfyui-meshanything-v2"
+            f".{module_name}", "custom_nodes.comfyui_meshanything_v2"
         ),
         cls,
     )
