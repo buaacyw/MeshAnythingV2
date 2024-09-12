@@ -42,10 +42,11 @@ SUPPORTED_CHECKPOINTS_EXTENSIONS = (
 )
 
 SUPPORTED_3D_EXTENSIONS = (
-    '.obj',
-    '.ply',
-    '.glb',
+    ".obj",
+    ".ply",
+    ".glb",
 )
+
 
 class Dataset:
     def __init__(self, input_type, input_list, mc=False, mc_level=7):
@@ -112,30 +113,34 @@ class Dataset:
 
         return data_dict
 
+
 def parse_save_filename(save_path, output_directory, supported_extensions, class_name):
-    
+
     folder_path, filename = os.path.split(save_path)
     filename, file_extension = os.path.splitext(filename)
     if file_extension.lower() in supported_extensions:
         if not os.path.isabs(save_path):
             folder_path = join(output_directory, folder_path)
-        
+
         os.makedirs(folder_path, exist_ok=True)
-        
+
         # replace time date format to current time
-        now = datetime.now() # current date and time
+        now = datetime.now()  # current date and time
         all_date_format = ["%Y", "%m", "%d", "%H", "%M", "%S", "%f"]
         for date_format in all_date_format:
             if date_format in filename:
                 filename = filename.replace(date_format, now.strftime(date_format))
-                
+
         save_path = join(folder_path, filename) + file_extension
         print(f"[{class_name}] Saving model to {save_path}")
         return save_path
     else:
-        print(f"[{class_name}] File name {filename} does not end with supported file extensions: {supported_extensions}")
-    
+        print(
+            f"[{class_name}] File name {filename} does not end with supported file extensions: {supported_extensions}"
+        )
+
     return None
+
 
 def resume_or_download_model_from_hf(
     checkpoints_dir_abs, repo_id, model_name, class_name="", repo_type="model"
@@ -355,6 +360,65 @@ def process_mesh_to_pc(mesh_list, marching_cubes=False, sample_num=8192, mc_leve
     return pc_normal_list, return_mesh_list
 
 
+def switch_vector_axis(vector3s, target_axis):
+    """
+    Example:
+        vector3s = torch.tensor([[1, 2, 3], [3, 2, 1], [2, 3, 1]])  # shape (N, 3)
+
+        target_axis = (2, 0, 1) # or [2, 0, 1]
+        vector3s[:, [0, 1, 2]] = vector3s[:, target_axis]
+
+        # Result: tensor([[3, 1, 2], [1, 3, 2], [1, 2, 3]])
+    """
+    vector3s[:, [0, 1, 2]] = vector3s[:, target_axis]
+    return vector3s
+
+
+def switch_mesh_axis_and_scale(mesh, target_axis, target_scale, flip_normal=False):
+    """
+    Args:
+        target_axis (array): shape (3)
+        target_scale (array): shape (3)
+    """
+    target_scale = torch.tensor(target_scale).float().cuda()
+    mesh.v = switch_vector_axis(mesh.v * target_scale, target_axis)
+    mesh.vn = switch_vector_axis(mesh.vn * target_scale, target_axis)
+    if flip_normal:
+        mesh.vn *= -1
+    return mesh
+
+
+def get_target_axis_and_scale(axis_string, scale_value=1.0):
+    """
+    Coordinate system inverts when:
+    1. Any of the axis inverts
+    2. Two of the axises switch
+
+    If coordinate system inverts twice in a row then it will not be inverted
+    """
+    axis_names = ["x", "y", "z"]
+
+    target_axis, target_scale, coordinate_invert_count = [], [], 0
+    axis_switch_count = 0
+    for i in range(len(axis_names)):
+        s = axis_string[i]
+        if s[0] == "-":
+            target_scale.append(-scale_value)
+            coordinate_invert_count += 1
+        else:
+            target_scale.append(scale_value)
+
+        new_axis_i = axis_names.index(s[1])
+        if new_axis_i != i:
+            axis_switch_count += 1
+        target_axis.append(new_axis_i)
+
+    if axis_switch_count == 2:
+        coordinate_invert_count += 1
+
+    return target_axis, target_scale, coordinate_invert_count
+
+
 class Resize_Image_Foreground:
     @classmethod
     def INPUT_TYPES(cls):
@@ -524,6 +588,7 @@ class MeshAnything3D:
 
         return (mesh,)
 
+
 class Save_3D_Mesh:
 
     @classmethod
@@ -531,30 +596,120 @@ class Save_3D_Mesh:
         return {
             "required": {
                 "mesh": ("MESH",),
-                "save_path": ("STRING", {"default": 'Mesh_%Y-%m-%d-%M-%S-%f.glb', "multiline": False}),
+                "save_path": (
+                    "STRING",
+                    {"default": "Mesh_%Y-%m-%d-%M-%S-%f.glb", "multiline": False},
+                ),
             },
         }
 
     OUTPUT_NODE = True
-    RETURN_TYPES = (
-        "STRING",
-    )
-    RETURN_NAMES = (
-        "save_path",
-    )
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("save_path",)
     FUNCTION = "save_mesh"
-    CATEGORY = "Comfy3D/Import|Export"
-    
+    CATEGORY = "CMA_3D/Import|Export"
+
     def save_mesh(self, mesh, save_path):
-        save_path = parse_save_filename(save_path, folder_paths.output_directory, SUPPORTED_3D_EXTENSIONS, self.__class__.__name__)
-        
+        save_path = parse_save_filename(
+            save_path,
+            folder_paths.output_directory,
+            SUPPORTED_3D_EXTENSIONS,
+            self.__class__.__name__,
+        )
+
         if save_path is not None:
             mesh.write(save_path)
 
-        return (save_path, )
+        return (save_path,)
+
+
+class Switch_Mesh_Axis:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "mesh": ("MESH",),
+                "axis_x_to": (["+x", "-x", "+y", "-y", "+z", "-z"],),
+                "axis_y_to": (["+y", "-y", "+z", "-z", "+x", "-x"],),
+                "axis_z_to": (["+z", "-z", "+x", "-x", "+y", "-y"],),
+                "flip_normal": (
+                    "BOOLEAN",
+                    {"default": False},
+                ),
+                "scale": (
+                    "FLOAT",
+                    {"default": 1.0, "min": 0.01, "max": 100, "step": 0.01},
+                ),
+            },
+        }
+
+    RETURN_TYPES = ("MESH",)
+    RETURN_NAMES = ("switched_mesh",)
+    FUNCTION = "switch_axis_and_scale"
+    CATEGORY = "CMA_3D/Preprocessor"
+
+    def switch_axis_and_scale(
+        self, mesh, axis_x_to, axis_y_to, axis_z_to, flip_normal, scale
+    ):
+
+        switched_mesh = None
+
+        if (
+            axis_x_to[1] != axis_y_to[1]
+            and axis_x_to[1] != axis_z_to[1]
+            and axis_y_to[1] != axis_z_to[1]
+        ):
+            target_axis, target_scale, coordinate_invert_count = (
+                get_target_axis_and_scale([axis_x_to, axis_y_to, axis_z_to], scale)
+            )
+            switched_mesh = switch_mesh_axis_and_scale(
+                mesh, target_axis, target_scale, flip_normal
+            )
+        else:
+            print(
+                f"[{self.__class__.__name__}] axis_x_to: {axis_x_to}, axis_y_to: {axis_y_to}, axis_z_to: {axis_z_to} have to be on separated axis"
+            )
+
+        return (switched_mesh,)
+    
+class Preview_3DMesh:
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "mesh_file_path": ("STRING", {"default": '', "multiline": False}),
+            },
+        }
+    
+    OUTPUT_NODE = True
+    RETURN_TYPES = ()
+    FUNCTION = "preview_mesh"
+    CATEGORY = "CMA_3D/Visualize"
+    
+    def preview_mesh(self, mesh_file_path):
+        
+        mesh_folder_path, filename = os.path.split(mesh_file_path)
+        
+        if not os.path.isabs(mesh_file_path):
+            mesh_file_path = os.path.join(folder_paths.output_directory, mesh_folder_path)
+        
+        if not filename.lower().endswith(SUPPORTED_3D_EXTENSIONS):
+            print(f"[{self.__class__.__name__}] File name {filename} does not end with supported 3D file extensions: {SUPPORTED_3D_EXTENSIONS}")
+            mesh_file_path = ""
+        
+        previews = [
+            {
+                "filepath": mesh_file_path,
+            }
+        ]
+        return {"ui": {"previews": previews}, "result": ()}
+
 
 NODE_CLASS_MAPPINGS = {
     "CMA_Resize_Image_Foreground": Resize_Image_Foreground,
     "CMA_MeshAnything3D": MeshAnything3D,
-    "CMA_Save_3D_Mesh": Save_3D_Mesh
+    "CMA_Save_3D_Mesh": Save_3D_Mesh,
+    "CMA_Switch_Mesh_Axis": Switch_Mesh_Axis,
+    "CMA_Preview_Mesh": Preview_3DMesh
 }
