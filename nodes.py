@@ -556,4 +556,5 @@ class Save_3D_Mesh:
 NODE_CLASS_MAPPINGS = {
     "CMA_Resize_Image_Foreground": Resize_Image_Foreground,
     "CMA_MeshAnything3D": MeshAnything3D,
+    "CMA_Save_3D_Mesh": Save_3D_Mesh
 }
