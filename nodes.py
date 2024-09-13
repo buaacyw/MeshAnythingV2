@@ -125,7 +125,7 @@ def parse_save_filename(save_path, output_directory, supported_extensions, class
         os.makedirs(folder_path, exist_ok=True)
 
         # replace time date format to current time
-        now = datetime.now()  # current date and time
+        now = datetime.datetime.now()  # current date and time
         all_date_format = ["%Y", "%m", "%d", "%H", "%M", "%S", "%f"]
         for date_format in all_date_format:
             if date_format in filename:
@@ -463,8 +463,9 @@ class MeshAnything3D:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "reference_image": ("IMAGE",),
+                # "reference_image": ("IMAGE",),
                 # "reference_mask": ("MASK",),
+                "input_path": ("STRING", {"default": '', "multiline": False}),
                 "input_type": (["pc_normal", "mesh"], {"default": "pc"}),
                 "batchsize_per_gpu": (
                     "INT",
@@ -498,8 +499,9 @@ class MeshAnything3D:
     @torch.no_grad()
     def run_Model(
         self,
-        reference_image,
-        reference_mask,
+        # reference_image,
+        # reference_mask,
+        input_path,
         input_type,
         batchsize_per_gpu,
         seed,
@@ -507,7 +509,7 @@ class MeshAnything3D:
         mc,
         sampling,
     ):
-        single_image = torch_imgs_to_pils(reference_image, reference_mask)[0]
+        # single_image = torch_imgs_to_pils(reference_image, reference_mask)[0]
         checkpoint_dir = os.path.join(folder_paths.output_directory, "cma")
         os.makedirs(checkpoint_dir, exist_ok=True)
         kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
@@ -519,12 +521,14 @@ class MeshAnything3D:
         model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
 
         # Convert single_image to .npy and get path
-        npImage = np.array(single_image)
-        npImage = np.delete(arr=npImage, obj=3, axis=2)
-        file_name = datetime.datetime.now().strftime("%d_%H-%M-%S") + ".npy"
-        npy_file_path = os.join(checkpoint_dir, file_name)
-        with open(npy_file_path, "wb") as npy_file:
-            np.save(npy_file, npImage)
+        # single_image = single_image.resize((64,64))
+        # npImage = np.array(single_image)
+        # npImage = np.delete(arr=npImage, obj=3, axis=2)
+        # file_name = datetime.datetime.now().strftime("%d_%H-%M-%S") + ".npy"
+        # npy_file_path = os.path.join(checkpoint_dir, file_name)
+        npy_file_path = input_path
+        # with open(npy_file_path, "wb") as npy_file:
+        #     np.save(npy_file, npImage)
 
         # create dataset
         set_seed(seed)
@@ -584,9 +588,9 @@ class MeshAnything3D:
                     print(f"{save_path} Over!!")
         end_time = time.time()
         print(f"Total time: {end_time - begin_time}")
-        mesh = trimesh.load_mesh(given_mesh=scene_mesh[0])
+        # mesh = trimesh.load_mesh(given_mesh=scene_mesh)
 
-        return (mesh,)
+        return (scene_mesh,)
 
 
 class Save_3D_Mesh:
@@ -605,72 +609,22 @@ class Save_3D_Mesh:
 
     OUTPUT_NODE = True
     RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("save_path",)
+    RETURN_NAMES = ("mesh_file_path",)
     FUNCTION = "save_mesh"
     CATEGORY = "CMA_3D/Import|Export"
 
-    def save_mesh(self, mesh, save_path):
-        save_path = parse_save_filename(
-            save_path,
+    def save_mesh(self, mesh, mesh_file_path):
+        mesh_file_path = parse_save_filename(
+            mesh_file_path,
             folder_paths.output_directory,
             SUPPORTED_3D_EXTENSIONS,
             self.__class__.__name__,
         )
 
-        if save_path is not None:
-            mesh.write(save_path)
+        if mesh_file_path is not None:
+            mesh.export(mesh_file_path)
 
-        return (save_path,)
-
-
-class Switch_Mesh_Axis:
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "mesh": ("MESH",),
-                "axis_x_to": (["+x", "-x", "+y", "-y", "+z", "-z"],),
-                "axis_y_to": (["+y", "-y", "+z", "-z", "+x", "-x"],),
-                "axis_z_to": (["+z", "-z", "+x", "-x", "+y", "-y"],),
-                "flip_normal": (
-                    "BOOLEAN",
-                    {"default": False},
-                ),
-                "scale": (
-                    "FLOAT",
-                    {"default": 1.0, "min": 0.01, "max": 100, "step": 0.01},
-                ),
-            },
-        }
-
-    RETURN_TYPES = ("MESH",)
-    RETURN_NAMES = ("switched_mesh",)
-    FUNCTION = "switch_axis_and_scale"
-    CATEGORY = "CMA_3D/Preprocessor"
-
-    def switch_axis_and_scale(
-        self, mesh, axis_x_to, axis_y_to, axis_z_to, flip_normal, scale
-    ):
-
-        switched_mesh = None
-
-        if (
-            axis_x_to[1] != axis_y_to[1]
-            and axis_x_to[1] != axis_z_to[1]
-            and axis_y_to[1] != axis_z_to[1]
-        ):
-            target_axis, target_scale, coordinate_invert_count = (
-                get_target_axis_and_scale([axis_x_to, axis_y_to, axis_z_to], scale)
-            )
-            switched_mesh = switch_mesh_axis_and_scale(
-                mesh, target_axis, target_scale, flip_normal
-            )
-        else:
-            print(
-                f"[{self.__class__.__name__}] axis_x_to: {axis_x_to}, axis_y_to: {axis_y_to}, axis_z_to: {axis_z_to} have to be on separated axis"
-            )
-
-        return (switched_mesh,)
+        return (mesh_file_path,)
     
 class Preview_3DMesh:
 
@@ -710,6 +664,5 @@ NODE_CLASS_MAPPINGS = {
     "CMA_Resize_Image_Foreground": Resize_Image_Foreground,
     "CMA_MeshAnything3D": MeshAnything3D,
     "CMA_Save_3D_Mesh": Save_3D_Mesh,
-    "CMA_Switch_Mesh_Axis": Switch_Mesh_Axis,
     "CMA_Preview_Mesh": Preview_3DMesh
 }
