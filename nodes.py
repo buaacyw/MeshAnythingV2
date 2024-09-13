@@ -464,7 +464,7 @@ class MeshAnything3D:
         return {
             "required": {
                 "reference_image": ("IMAGE",),
-                "reference_mask": ("MASK",),
+                # "reference_mask": ("MASK",),
                 "input_type": (["pc_normal", "mesh"], {"default": "pc"}),
                 "batchsize_per_gpu": (
                     "INT",
@@ -596,7 +596,7 @@ class Save_3D_Mesh:
         return {
             "required": {
                 "mesh": ("MESH",),
-                "save_path": (
+                "mesh_file_path": (
                     "STRING",
                     {"default": "Mesh_%Y-%m-%d-%M-%S-%f.glb", "multiline": False},
                 ),

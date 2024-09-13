@@ -1,9 +1,10 @@
 apt-get update
-apt-get install -y wget curl git python3 python3-pip python3-dev build-essential virtualenv
+# apt-get install -y wget curl git python3 python3-pip python3-dev build-essential virtualenv
+sudo apt-get install -y virtualenv
 
-# virtualenv -p python3 venv
-# source ./venv/bin/activate
-pip install colabcode
+virtualenv -p python3 venv
+source ./venv/bin/activate
+# pip install colabcode
 
 # Setup comfyui
 cd ~/
