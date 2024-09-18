@@ -12,7 +12,10 @@ import skimage.measure
 import os
 from accelerate import Accelerator
 import folder_paths
+from folder_paths import get_filename_list, get_full_path, get_save_image_path, get_output_directory
 from os import listdir
+import sys
+from os import path
 from os.path import isfile, join, exists, dirname
 from accelerate.utils import set_seed
 from accelerate.utils import DistributedDataParallelKwargs
@@ -142,9 +145,7 @@ def parse_save_filename(save_path, output_directory, supported_extensions, class
     return None
 
 
-def resume_or_download_model_from_hf(
-    checkpoints_dir_abs, repo_id, model_name, class_name="", repo_type="model"
-):
+def resume_or_download_model_from_hf( checkpoints_dir_abs, repo_id, model_name, class_name="", repo_type="model"):
 
     ckpt_path = os.path.join(checkpoints_dir_abs, model_name)
     if not os.path.isfile(ckpt_path):
@@ -233,8 +234,7 @@ def torch_imgs_to_pils(images, masks=None, alpha_min=0.1):
 
 def pils_resize_foreground(
     pils: Union[Image.Image, List[Image.Image]],
-    ratio: float,
-) -> List[Image.Image]:
+    ratio: float,) -> List[Image.Image]:
     if isinstance(pils, Image.Image):
         pils = [pils]
 
@@ -280,8 +280,7 @@ def pils_resize_foreground(
 
 
 def pils_to_torch_imgs(
-    pils: Union[Image.Image, List[Image.Image]], device="cuda", force_rgb=True
-):
+    pils: Union[Image.Image, List[Image.Image]], device="cuda", force_rgb=True):
     if isinstance(pils, Image.Image):
         pils = [pils]
 
@@ -463,82 +462,84 @@ class MeshAnything3D:
     def INPUT_TYPES(s):
         return {
             "required": {
-                # "reference_image": ("IMAGE",),
-                # "reference_mask": ("MASK",),
-                "input_path": ("STRING", {"default": '', "multiline": False}),
-                "input_type": (["pc_normal", "mesh"], {"default": "pc"}),
-                "batchsize_per_gpu": (
-                    "INT",
-                    {"default": BATCHSIZE_PER_GPU, "min": 1, "max": 5},
+                "mesh": ("MESH",),
+                "batchsize_per_gpu": ("INT",
+                    {"default": 1, "min": 1, "max": 5},
                 ),
                 "seed": (
-                    "INT",
-                    {"default": SEED, "min": 0, "max": 5},
+                    "INT",{
+                        "default": 29, 
+                        "min": 0, 
+                        "max": 10000000
+                    },
                 ),
                 "mc_level": (
-                    "INT",
-                    {"default": MC_LEVEL, "min": 0, "max": 20},
+                    "INT",{
+                        "default": 7, 
+                        "min": 0, 
+                        "max": 20
+                    },
                 ),
                 "mc": (
-                    "BOOLEAN",
-                    {"default": False, "label_on": "max", "label_off": "min"},
+                    "BOOLEAN",{
+                        "default": True, 
+                        "label_on": "max", 
+                        "label_off": "min"
+                    },
                 ),
                 "sampling": (
-                    "BOOLEAN",
-                    {"default": False, "label_on": "max", "label_off": "min"},
+                    "BOOLEAN",{
+                        "default": False, 
+                        "label_on": "max", 
+                        "label_off": "min"},
                 ),
-            }
+            },
         }
 
     RETURN_TYPES = ("MESH",)
     RETURN_NAMES = ("mesh",)
 
-    FUNCTION = "run_Model"
+    FUNCTION = "mesh_anything"
+
+    #OUTPUT_NODE = False
     CATEGORY = "CMA_3D/Algorithm"
 
-    @torch.no_grad()
-    def run_Model(
-        self,
-        # reference_image,
-        # reference_mask,
-        input_path,
-        input_type,
-        batchsize_per_gpu,
-        seed,
-        mc_level,
-        mc,
-        sampling,
-    ):
-        # single_image = torch_imgs_to_pils(reference_image, reference_mask)[0]
-        checkpoint_dir = os.path.join(folder_paths.output_directory, "cma")
+    def mesh_anything(self, mesh, batchsize_per_gpu,seed,mc_level,mc,sampling):
+
+        cur_time = datetime.datetime.now().strftime("%d_%H-%M-%S")
+        checkpoint_dir = os.path.join("mesh_output", cur_time)
         os.makedirs(checkpoint_dir, exist_ok=True)
+
         kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
         accelerator = Accelerator(
-            mixed_precision="fp16", project_dir=checkpoint_dir, kwargs_handlers=[kwargs]
+            mixed_precision="fp16",
+            project_dir=checkpoint_dir,
+            kwargs_handlers=[kwargs]
         )
 
-        # Load model
         model = MeshAnythingV2.from_pretrained("Yiwen-ntu/meshanythingv2")
-
-        # Convert single_image to .npy and get path
-        # single_image = single_image.resize((64,64))
-        # npImage = np.array(single_image)
-        # npImage = np.delete(arr=npImage, obj=3, axis=2)
-        # file_name = datetime.datetime.now().strftime("%d_%H-%M-%S") + ".npy"
-        # npy_file_path = os.path.join(checkpoint_dir, file_name)
-        npy_file_path = input_path
-        # with open(npy_file_path, "wb") as npy_file:
-        #     np.save(npy_file, npImage)
-
-        # create dataset
-        set_seed(seed)
-        dataset = Dataset(input_type, [npy_file_path], mc, mc_level)
+        
+        saved = list()
+        full_output_folder, filename, counter, subfolder, filename_prefix = get_save_image_path("meshsave",get_output_directory())
+        for (batch_number, single_mesh) in enumerate(mesh):
+            filename_with_batch_num = filename.replace("%batch_num%", str(batch_number))
+            file = f"{filename_with_batch_num}_{counter:05}_.obj"
+            single_mesh.apply_transform(np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, -1, 0, 0], [0, 0, 0, 1]]))
+            single_mesh.export(path.join(full_output_folder, file))
+        
+        input_path = path.join(full_output_folder, file)
+        print("input path: ", input_path)
+        if input_path is not None:
+            set_seed(seed)
+            dataset = Dataset("mesh", [input_path], mc, mc_level)
+        else:
+            raise ValueError("input_path must be provided.")
 
         dataloader = torch.utils.data.DataLoader(
             dataset,
             batch_size=batchsize_per_gpu,
-            drop_last=False,
-            shuffle=False,
+            drop_last = False,
+            shuffle = False,
         )
 
         if accelerator.state.num_processes > 1:
@@ -546,51 +547,43 @@ class MeshAnything3D:
         dataloader, model = accelerator.prepare(dataloader, model)
         begin_time = time.time()
         print("Generation Start!!!")
-        scene_mesh = None
         with accelerator.autocast():
             for curr_iter, batch_data_label in enumerate(dataloader):
                 curr_time = time.time()
-                outputs = model(batch_data_label["pc_normal"], sampling=sampling)
+                outputs = model(batch_data_label['pc_normal'], sampling=sampling)
                 batch_size = outputs.shape[0]
                 device = outputs.device
 
                 for batch_id in range(batch_size):
                     recon_mesh = outputs[batch_id]
-                    valid_mask = torch.all(
-                        ~torch.isnan(recon_mesh.reshape((-1, 9))), dim=1
-                    )
+                    valid_mask = torch.all(~torch.isnan(recon_mesh.reshape((-1, 9))), dim=1)
                     recon_mesh = recon_mesh[valid_mask]  # nvalid_face x 3 x 3
 
                     vertices = recon_mesh.reshape(-1, 3).cpu()
                     vertices_index = np.arange(len(vertices))  # 0, 1, ..., 3 x face
                     triangles = vertices_index.reshape(-1, 3)
 
-                    scene_mesh = trimesh.Trimesh(
-                        vertices=vertices,
-                        faces=triangles,
-                        force="mesh",
-                        merge_primitives=True,
-                    )
+                    scene_mesh = trimesh.Trimesh(vertices=vertices, faces=triangles, force="mesh",
+                                                merge_primitives=True)
                     scene_mesh.merge_vertices()
                     scene_mesh.update_faces(scene_mesh.nondegenerate_faces())
                     scene_mesh.update_faces(scene_mesh.unique_faces())
                     scene_mesh.remove_unreferenced_vertices()
                     scene_mesh.fix_normals()
-                    save_path = os.path.join(
-                        checkpoint_dir, f'{batch_data_label["uid"][batch_id]}_gen.obj'
-                    )
+                    save_path = os.path.join(checkpoint_dir, f'{batch_data_label["uid"][batch_id]}_gen.obj')
                     num_faces = len(scene_mesh.faces)
                     brown_color = np.array([255, 165, 0, 255], dtype=np.uint8)
                     face_colors = np.tile(brown_color, (num_faces, 1))
 
                     scene_mesh.visual.face_colors = face_colors
+                    result = scene_mesh
                     scene_mesh.export(save_path)
                     print(f"{save_path} Over!!")
+        
         end_time = time.time()
         print(f"Total time: {end_time - begin_time}")
-        # mesh = trimesh.load_mesh(given_mesh=scene_mesh)
-
-        return (scene_mesh,)
+        
+        return ([result],)
 
 
 class Save_3D_Mesh:
