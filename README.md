@@ -2,23 +2,24 @@
   <h3 align="center"><strong>MeshAnything V2:<br> Artist-Created Mesh Generation<br>With Adjacent Mesh Tokenization</strong></h3>
 
 <p align="center">
-    <a href="https://buaacyw.github.io/">Yiwen Chen</a><sup>1</sup>,
-    <a href="https://yikaiw.github.io/">Yikai Wang</a><sup>2</sup><span class="note">*</span>,
-    <a href="https://github.com/Luo-Yihao">Yihao Luo</a><sup>3</sup>,
-    <a href="https://thuwzy.github.io/">Zhengyi Wang</a><sup>2</sup>,
+    <a href="https://buaacyw.github.io/">Yiwen Chen</a><sup>1,2</sup>,
+    <a href="https://yikaiw.github.io/">Yikai Wang</a><sup>3</sup><span class="note">*</span>,
+    <a href="https://github.com/Luo-Yihao">Yihao Luo</a><sup>4</sup>,
+    <a href="https://thuwzy.github.io/">Zhengyi Wang</a><sup>2,3</sup>,
     <br>
-    <a href="https://scholar.google.com/citations?user=2pbka1gAAAAJ&hl=en">Zilong Chen</a><sup>2</sup>,
-    <a href="https://ml.cs.tsinghua.edu.cn/~jun/index.shtml">Jun Zhu</a><sup>2</sup>,
-    <a href="https://icoz69.github.io/">Chi Zhang</a><sup>4</sup><span class="note">*</span>,
+    <a href="https://scholar.google.com/citations?user=2pbka1gAAAAJ&hl=en">Zilong Chen</a><sup>2,3</sup>,
+    <a href="https://ml.cs.tsinghua.edu.cn/~jun/index.shtml">Jun Zhu</a><sup>2,3</sup>,
+    <a href="https://icoz69.github.io/">Chi Zhang</a><sup>5</sup><span class="note">*</span>,
     <a href="https://guosheng.github.io/">Guosheng Lin</a><sup>1</sup><span class="note">*</span>
     <br>
     <sup>*</sup>Corresponding authors.
     <br>
     <sup>1</sup>S-Lab, Nanyang Technological University,
-    <sup>2</sup>Tsinghua University,
+    <sup>2</sup>Shengshu,
     <br>
-    <sup>3</sup>Imperial College London,
-    <sup>4</sup>Westlake University
+    <sup>3</sup>Tsinghua University,
+    <sup>4</sup>Imperial College London,
+    <sup>5</sup>Westlake University
 </p>
 
 
