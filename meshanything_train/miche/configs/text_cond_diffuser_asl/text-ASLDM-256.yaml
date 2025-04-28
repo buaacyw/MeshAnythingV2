@@ -1,0 +1,98 @@
+model:
+  target: michelangelo.models.asl_diffusion.clip_asl_diffuser_pl_module.ClipASLDiffuser
+  params:
+    first_stage_config:
+      target: michelangelo.models.tsal.asl_pl_module.AlignedShapeAsLatentPLModule
+      params:
+        shape_module_cfg:
+          target: michelangelo.models.tsal.sal_perceiver.AlignedShapeLatentPerceiver
+          params:
+            num_latents: &num_latents 256
+            embed_dim: &embed_dim 64
+            point_feats: 3   # normal
+            num_freqs: 8
+            include_pi: false
+            heads: 12
+            width: 768
+            num_encoder_layers: 8
+            num_decoder_layers: 16
+            use_ln_post: true
+            init_scale: 0.25
+            qkv_bias: false
+            use_checkpoint: true
+        aligned_module_cfg:
+          target: michelangelo.models.tsal.clip_asl_module.CLIPAlignedShapeAsLatentModule
+          params:
+            clip_model_version: "./checkpoints/clip/clip-vit-large-patch14"
+
+        loss_cfg:
+          target: torch.nn.Identity
+
+    cond_stage_config:
+      target: michelangelo.models.conditional_encoders.encoder_factory.FrozenAlignedCLIPTextEmbedder
+      params:
+        version: "./checkpoints/clip/clip-vit-large-patch14"
+        zero_embedding_radio: 0.1
+        max_length: 77
+
+    first_stage_key: "surface"
+    cond_stage_key: "text"
+    scale_by_std: false
+
+    denoiser_cfg:
+      target: michelangelo.models.asl_diffusion.asl_udt.ConditionalASLUDTDenoiser
+      params:
+        input_channels: *embed_dim
+        output_channels: *embed_dim
+        n_ctx: *num_latents
+        width: 768
+        layers: 8   # 2 * 6 + 1 = 13
+        heads: 12
+        context_dim: 768
+        init_scale: 1.0
+        skip_ln: true
+        use_checkpoint: true
+
+    scheduler_cfg:
+      guidance_scale: 7.5
+      num_inference_steps: 50
+      eta: 0.0
+
+      noise:
+        target: diffusers.schedulers.DDPMScheduler
+        params:
+          num_train_timesteps: 1000
+          beta_start: 0.00085
+          beta_end: 0.012
+          beta_schedule: "scaled_linear"
+          variance_type: "fixed_small"
+          clip_sample: false
+      denoise:
+        target: diffusers.schedulers.DDIMScheduler
+        params:
+          num_train_timesteps: 1000
+          beta_start: 0.00085
+          beta_end: 0.012
+          beta_schedule: "scaled_linear"
+          clip_sample: false   # clip sample to -1~1
+          set_alpha_to_one: false
+          steps_offset: 1
+
+    optimizer_cfg:
+      optimizer:
+        target: torch.optim.AdamW
+        params:
+          betas: [0.9, 0.99]
+          eps: 1.e-6
+          weight_decay: 1.e-2
+
+      scheduler:
+        target: michelangelo.utils.trainings.lr_scheduler.LambdaWarmUpCosineFactorScheduler
+        params:
+          warm_up_steps: 5000
+          f_start: 1.e-6
+          f_min: 1.e-3
+          f_max: 1.0
+
+    loss_cfg:
+      loss_type: "mse"

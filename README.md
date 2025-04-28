@@ -43,6 +43,7 @@
 - [Contents](#contents)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Training](#training)
 - [Important Notes](#important-notes)
 - [Acknowledgement](#acknowledgement)
 - [BibTeX](#bibtex)
@@ -56,6 +57,7 @@ conda create -n MeshAnythingV2 python==3.10.13 -y
 conda activate MeshAnythingV2
 pip install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu118
 pip install -r requirements.txt
+pip install -r training_requirements.txt # in case you want to train
 pip install flash-attn --no-build-isolation
 pip install -U gradio
 ```
@@ -110,6 +112,28 @@ python main.py --input_path pc_examples/grenade.npy --out_dir pc_output --input_
 ### Local Gradio Demo <a href='https://github.com/gradio-app/gradio'><img src='https://img.shields.io/github/stars/gradio-app/gradio'></a>
 ```
 python app.py
+```
+
+## Training
+
+### Step 1 Download Dataset
+We provide part of our processed dataset from Objaverse. You can download it from https://huggingface.co/datasets/Yiwen-ntu/MeshAnythingV2/tree/main
+
+After downloading, place `train.npz` and `test.npz` into the `dataset` directory.
+
+If you prefer to process your own data, please refer to `data_process.py`.
+
+### Step 2 Download Point Cloud Encoder Checkpoints
+
+Download Michelangelo's point encoder from https://huggingface.co/Maikou/Michelangelo/tree/main/checkpoints/aligned_shape_latents and put it into `meshanything_train/miche/checkpoints/aligned_shape_latents/shapevae-256.ckpt`.
+
+### Step 3 Training and Evaluation
+```
+# Training with MultiGPU
+accelerate launch --multi_gpu --num_processes 8 train.py  --batchsize_per_gpu 2 --checkpoint_dir training_trial
+
+# Evaluation
+python train.py --batchsize_per_gpu 2 --checkpoint_dir evaluation_trial --pretrained_weights gpt_output/training_trial/xxx_xxx.pth --test_only
 ```
 
 ## Important Notes
